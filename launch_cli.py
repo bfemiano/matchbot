@@ -1,13 +1,13 @@
 import readline
 
-from matcher.matcher import Matcher, NoPersonalityFileException
+from matcher.matcher import Matcher, NoPersonalityException
 from gender.gender import UnsupporteGenderCommandException
 
 def get_help():
     mat = "/match [woman|man|nonbinary] to match with a new partner.\n"
-    hlp = "/help to see more info\n"
+    hlp = "/help to see this printout\n"
     sav = "/save to save your current chat partner session to ./personality.dat\n"
-    lod = "/load to reload the save session\n"
+    lod = "/load to bring back the saved chat partner session\n"
     ext = "/exit to ghost."
     return "%s%s%s%s%s" % (mat, hlp, sav, lod, ext)
 
@@ -26,14 +26,17 @@ def main():
         elif line == "/help":
             print("\n%s\n" % get_help())
         elif line == "/save":
-            print("persisting current chat partner: %s" % matcher.personality)
-            matcher.save_personality()
-            print("persistence successful.")
+            print("Trying to save current chat partner: %s" % matcher.personality)
+            try:
+                matcher.save_personality()
+                print("Save successful.")
+            except NoPersonalityException:
+                print("Failed. No active personality to save")
         elif line == "/load":
             try:
                 matcher.load_personality()
-                print("Hi there! This is %s. It's great to see you again!" % matcher.personality)
-            except NoPersonalityFileException:
+                print("\t\tHi there! This is %s. It's great to see you again!" % matcher.personality)
+            except NoPersonalityException:
                 print("Missing personality.dat file in basedir")
         elif line.startswith("/match"): # TODO abstract this away
             try:

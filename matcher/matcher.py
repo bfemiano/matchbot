@@ -7,7 +7,7 @@ from time import sleep
 from gender.gender import Gender
 from personality.personality import Personality
 
-class NoPersonalityFileException(Exception):
+class NoPersonalityException(Exception):
     pass
 
 def slight_delay(name): # TODO abstract this away
@@ -25,6 +25,7 @@ class Matcher(object):
 
     def __init__(self):
         self.gender = Gender()
+        self.personality = None
 
     def match(self, command):
         return self.gender.get_name(command)
@@ -36,12 +37,15 @@ class Matcher(object):
         self.personality = Personality(name)
 
     def save_personality(self):
+        if self.personality is None:
+            raise NoPersonalityException()
+
         with open("personality.dat", "wb") as out_file:
             pickle.dump(self.personality, out_file)
 
     def load_personality(self):
         if not path.exists("personality.dat"):
-            raise NoPersonalityFileException()
+            raise NoPersonalityException()
 
         with open("personality.dat", "rb")as in_file:
             self.personality = pickle.load(in_file)
