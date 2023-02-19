@@ -1,7 +1,7 @@
 from nltk.corpus import names
 from random import randint 
 
-class UnsupporteGenderCommandException(Exception):
+class UnsupportedGenderCommandException(Exception):
     def __init__(self):
         self.msg = "Must be either 'woman', 'man', or 'nonbinary'"
         
@@ -21,7 +21,7 @@ class Gender:
     def get_name(self, gender_command):
         parts = gender_command.split(" ")
         if len(parts) <= 1:
-            raise UnsupporteGenderCommandException()
+            raise UnsupportedGenderCommandException()
         return self._get_name(parts[1])
 
     def get_random_name(self):
@@ -35,4 +35,4 @@ class Gender:
         elif gender == "nonbinary":
             return self.nonbinary_names[randint(0, len(self.nonbinary_names))]
         else:
-            raise UnsupporteGenderCommandException()
+            raise UnsupportedGenderCommandException()

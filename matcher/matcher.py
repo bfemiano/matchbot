@@ -6,6 +6,7 @@ from time import sleep
 
 from gender.gender import Gender
 from personality.personality import Personality
+from personality.loaders import InterestLoader, TraitLoader
 
 class NoPersonalityException(Exception):
     pass
@@ -25,6 +26,8 @@ class Matcher(object):
 
     def __init__(self):
         self.gender = Gender()
+        self.trait_loader = TraitLoader()
+        self.interest_loader = InterestLoader()
         self.personality = None
 
     def match(self, command):
@@ -34,7 +37,7 @@ class Matcher(object):
         return self.gender.get_random_name()
 
     def new_personality(self, name):
-        self.personality = Personality(name)
+        self.personality = Personality(name, self.trait_loader.possible_traits, self.interest_loader.possible_interests)
 
     def save_personality(self):
         if self.personality is None:
@@ -51,5 +54,5 @@ class Matcher(object):
             self.personality = pickle.load(in_file)
         
     def personality_response(self, line: str):
-        slight_delay(self.personality)
+        #slight_delay(self.personality)
         return self.personality.respond(line)
