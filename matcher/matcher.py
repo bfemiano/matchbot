@@ -43,14 +43,14 @@ class Matcher(object):
         if self.personality is None:
             raise NoPersonalityException()
 
-        with open("personality.dat", "wb") as out_file:
+        with open("saved_personality.dat", "wb") as out_file:
             pickle.dump(self.personality, out_file)
 
     def load_personality(self):
-        if not path.exists("personality.dat"):
+        if not path.exists("saved_personality.dat"):
             raise NoPersonalityException()
 
-        with open("personality.dat", "rb")as in_file:
+        with open("saved_personality.dat", "rb")as in_file:
             self.personality = pickle.load(in_file)
         
     def personality_response(self, line: str):

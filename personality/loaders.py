@@ -4,16 +4,17 @@ class TraitLoader(object):
 
     def __init__(self):
         self.raw_traits = set()
-        # source https://argoprep.com/blog/206-personality-adjectives-to-describe-anybody/
-        with open('personality/personality_traits.txt', 'r') as traits_in:
+        with open('data/personality_traits.txt', 'r') as traits_in:
             for line in traits_in.readlines():
                 self.raw_traits.add(line.strip('\n').lower())
         deduped_traits = self.dedup_synonyms()
         self.possible_traits = self.map_traits_to_incompatibile_traits(deduped_traits)
         
     def dedup_synonyms(self, syns_func=wordnet.synsets):
-        # remove any traits that are symantically the same
-        # TODO add unit tests
+        '''
+            remove any traits that are symantically the same
+        '''
+        # TODO write unit tests for this
         dups = set()
         for trait in self.raw_traits:
             if trait not in dups:
@@ -25,9 +26,11 @@ class TraitLoader(object):
 
     
     def map_traits_to_incompatibile_traits(self, deduped_traits, syns_func=wordnet.synsets):
-        # for each trait, figure out which traits a person would not also have with it (I.E cautious -> risk-taker)
-        # return a map of trait -> set_of_incompatible_traits
-        # TODO add unit tests
+        '''
+            for each trait, figure out which traits a person would not also have with it (I.E cautious -> risk-taker)
+            return a map of trait -> set_of_incompatible_traits
+        '''
+        # TODO write unit tests for this
         trait_to_incompatible_traits = {}
         for trait in deduped_traits:
             if trait not in trait_to_incompatible_traits:
@@ -44,4 +47,5 @@ class TraitLoader(object):
 class InterestLoader(object):
     
     def __init__(self):
-        self.possible_interests = []
+        with open('data/interests.txt', 'r') as interests_in:
+            self.possible_interests = [l.strip('\n') for l in interests_in.readlines()]

@@ -13,8 +13,7 @@ class Gender:
         self.male_names = names.words('male.txt')
         self.female_names = names.words('female.txt')
         self.nonbinary_names = []
-        # source: https://nameberry.com/list/851/nonbinary-names/all
-        with open("gender/nonbinary.txt", 'r') as nonbinary_names:
+        with open("data/nonbinary_names.txt", 'r') as nonbinary_names:
             for line in nonbinary_names.readlines():
                 self.nonbinary_names.append(line.strip("\n"))
 
