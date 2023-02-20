@@ -26,7 +26,7 @@ TODO
 
 https://argoprep.com/blog/206-personality-adjectives-to-describe-anybody/
 
-### Nonbinary gender mames
+### Nonbinary names
 
 https://nameberry.com/list/851/nonbinary-names/all
 
