@@ -1,15 +1,15 @@
 from nltk.corpus import names
-from random import randint 
+from random import randint
 
 class UnsupportedGenderCommandException(Exception):
     def __init__(self):
-        self.msg = "Must be either 'woman', 'man', or 'nonbinary'"
+        self.msg = "Must be either w, m, or n"
         
 
 class Gender:
 
     def __init__(self):
-        self.gender_types = ["woman", "man", "nonbinary"]
+        self.gender_types = ["w", "n", "b"]
         self.male_names = names.words('male.txt')
         self.female_names = names.words('female.txt')
         self.nonbinary_names = []
@@ -17,21 +17,21 @@ class Gender:
             for line in nonbinary_names.readlines():
                 self.nonbinary_names.append(line.strip("\n"))
 
-    def get_name(self, gender_command):
-        parts = gender_command.split(" ")
-        if len(parts) <= 1:
+    def get_name(self, command):
+        parts = command.split(" ")
+        if len(parts) < 2:
             raise UnsupportedGenderCommandException()
         return self._get_name(parts[1])
 
     def get_random_name(self):
-        return self._get_name(self.gender_types[randint(0, 2)])
+        return self._get_name(self.gender_types[randint(0, len(self.gender_types)-1)])
 
     def _get_name(self, gender:str) -> str:
-        if gender == "woman":
+        if gender == "w":
             return self.female_names[randint(0, len(self.female_names))]
-        elif gender == "man":
+        elif gender == "m":
             return self.male_names[randint(0, len(self.male_names))]
-        elif gender == "nonbinary":
+        elif gender == "n":
             return self.nonbinary_names[randint(0, len(self.nonbinary_names))]
         else:
             raise UnsupportedGenderCommandException()

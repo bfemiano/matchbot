@@ -2,6 +2,7 @@ import readline
 
 from matcher.matcher import Matcher, NoPersonalityException
 from gender.gender import UnsupportedGenderCommandException
+from age.age import UnsupportedAgeCommandException
 
 def get_help():
     mat = "/match [woman|man|nonbinary] to match with a new partner.\n"
@@ -43,7 +44,7 @@ def main():
                 matcher.new_personality(matcher.match(line))
                 print("\nNow talking with %s!\n" % matcher.personality) 
                 conseq_failed_match_attempts = 0
-            except UnsupportedGenderCommandException as e:
+            except (UnsupportedGenderCommandException, UnsupportedAgeCommandException) as e:
                 print(e.msg)
                 conseq_failed_match_attempts += 1
                 if conseq_failed_match_attempts == 6:

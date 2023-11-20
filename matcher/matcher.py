@@ -5,8 +5,10 @@ from random import randint
 from time import sleep
 
 from gender.gender import Gender
+from age.age import Age
 from personality.personality import Personality
 from personality.loaders import InterestLoader, TraitLoader
+from personality.responder import PersonalityEchoResponder
 
 class NoPersonalityException(Exception):
     pass
@@ -26,18 +28,22 @@ class Matcher(object):
 
     def __init__(self):
         self.gender = Gender()
+        self.age = Age()
         self.trait_loader = TraitLoader()
         self.interest_loader = InterestLoader()
         self.personality = None
 
     def match(self, command):
-        return self.gender.get_name(command)
+        self.gender = self.gender.get_name(command)
+        self.age = self.age.get_age(command)
 
     def match_random(self):
         return self.gender.get_random_name()
 
     def new_personality(self, name):
-        self.personality = Personality(name, self.trait_loader.possible_traits, self.interest_loader.possible_interests)
+        responder = PersonalityEchoResponder(self.name, self.interests, self.personality_traits)
+        self.personality = Personality(name, responder, 
+                                       self.trait_loader.possible_traits, self.interest_loader.possible_interests)
 
     def save_personality(self):
         if self.personality is None:

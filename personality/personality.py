@@ -1,5 +1,4 @@
 
-from personality.responder import GenericResponder, GPTResponder, PersonalityEchoResponder
 from random import randint
 
 class UnableToAssignTraitsException(Exception):
@@ -10,12 +9,11 @@ class UnableToAssignTraitsException(Exception):
 
 class Personality():
 
-    def __init__(self, name, possible_traits, possible_interests, n_traits=5, n_interests=5):
+    def __init__(self, name, responder, possible_traits, possible_interests, n_traits=5, n_interests=5):
         self.name = name
-        self.libido = randint(1, 10)
         self.personality_traits = self.assign_random_traits(possible_traits, n_select=n_traits)
         self.interests = self.assign_random_interests(possible_interests, n_select=n_interests)
-        self.responder = PersonalityEchoResponder(name, self.libido, self.interests, self.personality_traits)
+        self.responder = responder
 
     def __str__(self):
         return self.name
