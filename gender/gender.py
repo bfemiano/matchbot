@@ -28,10 +28,10 @@ class Gender:
 
     def _get_name(self, gender:str) -> str:
         if gender == "f":
-            return self.female_names[randint(0, len(self.female_names))]
+            return self.female_names[randint(0, len(self.female_names))], gender
         elif gender == "m":
-            return self.male_names[randint(0, len(self.male_names))]
+            return self.male_names[randint(0, len(self.male_names))], gender
         elif gender == "n":
-            return self.nonbinary_names[randint(0, len(self.nonbinary_names))]
+            return self.nonbinary_names[randint(0, len(self.nonbinary_names))], gender
         else:
             raise UnsupportedGenderCommandException()

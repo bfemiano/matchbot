@@ -34,13 +34,18 @@ class Matcher(object):
         self.personality = None
 
     def match(self, command):
-        return self.gender.get_name(command), self.age.get_age(command)
+        name, gender = self.gender.get_name(command)
+        age = self.age.get_age(command)
+        return name, age, gender
 
     def match_random(self):
-        return self.gender.get_random_name(), self.age.get_random_age()
+        name, gender = self.gender.get_random_name()
+        age = self.age.get_random_age()
+        return name, age, gender
 
-    def new_personality(self, name, years_old):
-        self.personality = Personality(name, years_old, disposition=50.0, possible_traits=self.trait_loader.possible_traits, 
+    def new_personality(self, name, years_old, gender):
+        self.personality = Personality(name, years_old, gender, 
+                                       disposition=50.0, possible_traits=self.trait_loader.possible_traits, 
                                        possible_interests=self.interest_loader.possible_interests)
         self.responder = self.set_responder()
         
