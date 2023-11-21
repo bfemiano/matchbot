@@ -8,7 +8,7 @@ from gender.gender import Gender
 from age.age import Age
 from personality.personality import Personality
 from personality.loaders import InterestLoader, TraitLoader
-from personality.responder import PersonalityEchoResponder
+from responder.responder import PersonalityEchoResponder
 
 class NoPersonalityException(Exception):
     pass
@@ -34,17 +34,16 @@ class Matcher(object):
         self.personality = None
 
     def match(self, command):
-        self.gender = self.gender.get_name(command)
-        self.age = self.age.get_age(command)
+        return self.gender.get_name(command), self.age.get_age(command)
 
     def match_random(self):
-        return self.gender.get_random_name()
+        return self.gender.get_random_name(), self.age.get_random_age()
 
-    def new_personality(self, name):
-        responder = PersonalityEchoResponder(self.name, self.interests, self.personality_traits)
-        self.personality = Personality(name, responder, 
-                                       self.trait_loader.possible_traits, self.interest_loader.possible_interests)
-
+    def new_personality(self, name, years_old):
+        self.personality = Personality(name, years_old, disposition=50.0, possible_traits=self.trait_loader.possible_traits, 
+                                       possible_interests=self.interest_loader.possible_interests)
+        self.responder = self.set_responder()
+        
     def save_personality(self):
         if self.personality is None:
             raise NoPersonalityException()
@@ -56,9 +55,13 @@ class Matcher(object):
         if not path.exists("saved_personality.dat"):
             raise NoPersonalityException()
 
-        with open("saved_personality.dat", "rb")as in_file:
+        with open("saved_personality.dat", "rb") as in_file:
             self.personality = pickle.load(in_file)
+        self.responder = self.set_responder()
         
     def personality_response(self, line: str):
         #slight_delay(self.personality)
-        return self.personality.respond(line)
+        return self.responder.respond(line)
+    
+    def set_responder(self):
+        return PersonalityEchoResponder(personality=self.personality)

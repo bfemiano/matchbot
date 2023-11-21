@@ -5,7 +5,7 @@ from gender.gender import UnsupportedGenderCommandException
 from age.age import UnsupportedAgeCommandException
 
 def get_help():
-    mat = "/match [woman|man|nonbinary] to match with a new partner.\n"
+    mat = "/match [m|f|n] [18-100] to match with a new partner in an age range.\n"
     hlp = "/help to see this printout\n"
     sav = "/save to save your current chat partner session to ./personality.dat\n"
     lod = "/load to bring back the saved chat partner session\n"
@@ -36,13 +36,14 @@ def main():
         elif line == "/load":
             try:
                 matcher.load_personality()
-                print("\t\tHi there! This is %s. It's great to see you again!" % matcher.personality)
+                print("\t\tHi there! This is %s. It's great to see you again!" % matcher.personality.name)
             except NoPersonalityException:
                 print("Missing personality.dat file in basedir")
         elif line.startswith("/match"): # TODO abstract this away
             try:
-                matcher.new_personality(matcher.match(line))
-                print("\nNow talking with %s!\n" % matcher.personality) 
+                name, years_old = matcher.match(line)
+                matcher.new_personality(name, years_old)
+                print("\nNow talking with %s!\n" % name) 
                 conseq_failed_match_attempts = 0
             except (UnsupportedGenderCommandException, UnsupportedAgeCommandException) as e:
                 print(e.msg)

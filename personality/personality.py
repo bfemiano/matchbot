@@ -9,17 +9,21 @@ class UnableToAssignTraitsException(Exception):
 
 class Personality():
 
-    def __init__(self, name, responder, possible_traits, possible_interests, n_traits=5, n_interests=5):
+    def __init__(self, name: str, years_old: int, disposition: float, 
+                 possible_traits: list(), possible_interests: list(), n_traits=5, n_interests=5):
         self.name = name
+        self.years_old = years_old
+        self.disposition = disposition
         self.personality_traits = self.assign_random_traits(possible_traits, n_select=n_traits)
         self.interests = self.assign_random_interests(possible_interests, n_select=n_interests)
-        self.responder = responder
 
     def __str__(self):
-        return self.name
-
-    def respond(self, line):
-        return self.responder.respond(line)
+        l1 = f"{self.name}. {self.years_old} years old. "
+        l2 = f"I am {', '.join(self.personality_traits)}. "
+        l3 = f"I like {', '.join(self.interests)} "
+        l4 = f"disposition: {self.disposition} "
+        return l1 + l2 + l3 + l4
+        
 
     def assign_random_traits(self, possible_traits, n_select):
         '''

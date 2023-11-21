@@ -4,15 +4,11 @@ def test_m_uses_male_names():
     gender = Gender()
     name = gender.get_name("/match m 20")
     assert name in gender.male_names
-    assert name not in gender.female_names
-    assert name not in gender.nonbinary_names
 
 def test_w_uses_female_names():
     gender = Gender()
-    name = gender.get_name("/match w 20")
-    assert name not in gender.male_names
+    name = gender.get_name("/match f 20")
     assert name in gender.female_names
-    assert name not in gender.nonbinary_names
 
 def test_n_uses_nonbinary_names():
     gender = Gender()

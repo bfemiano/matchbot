@@ -3,13 +3,13 @@ from random import randint
 
 class UnsupportedGenderCommandException(Exception):
     def __init__(self):
-        self.msg = "Must be either w, m, or n"
+        self.msg = "Must be either m, f, or n (nonbinary)"
         
 
 class Gender:
 
     def __init__(self):
-        self.gender_types = ["w", "n", "b"]
+        self.gender_types = ["f", "n", "b"]
         self.male_names = names.words('male.txt')
         self.female_names = names.words('female.txt')
         self.nonbinary_names = []
@@ -27,7 +27,7 @@ class Gender:
         return self._get_name(self.gender_types[randint(0, len(self.gender_types)-1)])
 
     def _get_name(self, gender:str) -> str:
-        if gender == "w":
+        if gender == "f":
             return self.female_names[randint(0, len(self.female_names))]
         elif gender == "m":
             return self.male_names[randint(0, len(self.male_names))]

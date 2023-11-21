@@ -28,18 +28,14 @@ class GenericResponder(WrapperOutputResponder):
 
 class PersonalityEchoResponder(WrapperOutputResponder):
 
-    def __init__(self, name, personality, *args, **kwargs):
-        super(PersonalityEchoResponder, self).__init__(wrap_count=180, *args, **kwargs)
-        self.name = name
+    def __init__(self, personality, *args, **kwargs):
+        super(PersonalityEchoResponder, self).__init__(wrap_count=100, *args, **kwargs)
         self.personality = personality
 
 
     def build_response_from_input(self, user_input: str) -> str:
-        return """
-            My name is {name} and I have the following characteristics {interests} {personality_traits}
-        """.format(name=self.name, interests=self.personality.interests, 
-                   personality_traits=self.personality.personality_traits)
+        return str(self.personality)
 
 
-class ClaudeResponder(WrapperOutputResponder): # TODO. Fun part.
+class GPTResponder(WrapperOutputResponder): # TODO. Fun part.
     pass

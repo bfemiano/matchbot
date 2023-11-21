@@ -9,12 +9,12 @@ class Age():
     def get_age(self, command):
         parts = command.split(" ")
         if len(parts) < 3:
-            age = randint(18, 100)
-            return age
+            return self._random_age_from(18, 100)
         lower, upper = self._parse(parts[2])
-        age = self._random_age_from(lower, upper)
-        return age
+        return self._random_age_from(lower, upper)
 
+    def get_random_age(self):
+        return self._random_age_from(18, 100)
         
     def _parse(self, age_arg):
             parts = age_arg.split("-")

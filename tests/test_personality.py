@@ -18,7 +18,7 @@ def possible_interests():
 
 @pytest.fixture
 def personality(possible_interests, possible_traits):
-    return Personality(name='test_name', responder=None,
+    return Personality(name='test_name', years_old=25, disposition=50.0,
                        possible_traits=possible_traits, 
                        possible_interests=possible_interests, 
                        n_traits=2, n_interests=2)
@@ -34,7 +34,7 @@ def test_assign_random_traits_avoids_conflicts(possible_traits, personality):
 
 def test_assign_random_traits_gives_up_after_too_many_incompatible_attempts(possible_traits, possible_interests):
     try:
-        Personality(name='test_name', responder=None, 
+        Personality(name='test_name', years_old=25, disposition=50.0,
                     possible_traits=possible_traits, possible_interests=possible_interests, 
                     n_traits=3, n_interests=2)
         pytest.fail("select should have failed")
