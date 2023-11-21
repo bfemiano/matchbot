@@ -3,7 +3,7 @@ from random import randint
 from personality.personality import Personality
 
 from nltk.tokenize import sent_tokenize, word_tokenize
-#from openai import OpenAI
+from openai import OpenAI
 
 class WrapperOutputResponder(object):
     def __init__(self, wrap_count=80):
@@ -46,7 +46,7 @@ class GPTResponder(WrapperOutputResponder):
     def __init__(self, personality, *args, **kwargs):
         super(GPTResponder, self).__init__(wrap_count=100, *args, **kwargs)
         self.personality = personality
-        #self.client = OpenAI()
+        self.client = OpenAI()
         self.system_prompt = f"""
             You are a {self.personality.years_old} years old person named {self.personality.name} 
             talking to someone using an online dating app who identifies as {self.personality.gender}. 
@@ -86,31 +86,27 @@ class GPTResponder(WrapperOutputResponder):
                 ]
             )
         response = completion.choices[0].message.content
-        disposition = self.get_disposition(response)
+        disposition, index = self.get_disposition(response)
         if disposition is None:
             return response
-        
         self.personality.update_disposition(disposition)
-        return self.strip_disposition(response)
+        return self.response_minus_disposition(response, index)
         
     def get_disposition(self, content):
         sentances = sent_tokenize(content)
-        print("sentances")
-        print(sentances)
         disposition = None
-        words = word_tokenize(sentances[-1])
-        print("WORDS in last sentance")
-        print(words)
-        for word in words:
-            try:
-                print(word)
-                disposition = int(float(word))
-                print(f"found disposition {disposition}")
-            except ValueError:
-                print("got error")
-                pass
-        return disposition
+        for i, s in enumerate(reversed(sentances)):
+            words = word_tokenize(s)
+            print(s)
+            for word in words:
+                try:
+                    disposition = int(float(word))
+                    print(f"found disposition {disposition}")
+                    return disposition, (len(sentances)-1) - i
+                except ValueError:
+                    pass
+        return disposition, -1
 
-    def strip_disposition(self, content):
+    def response_minus_disposition(self, content, index):
         sentances = sent_tokenize(content)
-        return ' '.join(sentances[0:-1])
+        return ' '.join([s for i, s in enumerate(sentances) if i != index])
