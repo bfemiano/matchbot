@@ -24,14 +24,14 @@ class Gender:
         return self._get_name(parts[1])
 
     def get_random_name(self):
-        return self._get_name(self.gender_types[randint(0, len(self.gender_types)-1)])
+        return self._get_name(self.gender_types[randint(0, len(self.gender_types) - 1)])
 
     def _get_name(self, gender:str) -> str:
         if gender == "f":
-            return self.female_names[randint(0, len(self.female_names))], gender
+            return self.female_names[randint(0, len(self.female_names) - 1)], gender
         elif gender == "m":
-            return self.male_names[randint(0, len(self.male_names))], gender
+            return self.male_names[randint(0, len(self.male_names) - 1)], gender
         elif gender == "n":
-            return self.nonbinary_names[randint(0, len(self.nonbinary_names))], gender
+            return self.nonbinary_names[randint(0, len(self.nonbinary_names) - 1)], gender
         else:
             raise UnsupportedGenderCommandException()

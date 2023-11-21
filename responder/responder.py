@@ -3,7 +3,7 @@ from random import randint
 from personality.personality import Personality
 
 from nltk.tokenize import sent_tokenize, word_tokenize
-from openai import OpenAI
+#from openai import OpenAI
 
 class WrapperOutputResponder(object):
     def __init__(self, wrap_count=80):
@@ -46,7 +46,7 @@ class GPTResponder(WrapperOutputResponder):
     def __init__(self, personality, *args, **kwargs):
         super(GPTResponder, self).__init__(wrap_count=100, *args, **kwargs)
         self.personality = personality
-        self.client = OpenAI()
+        #self.client = OpenAI()
         self.system_prompt = f"""
             You are a {self.personality.years_old} years old person named {self.personality.name} 
             talking to someone using an online dating app who identifies as {self.personality.gender}. 
@@ -95,12 +95,19 @@ class GPTResponder(WrapperOutputResponder):
         
     def get_disposition(self, content):
         sentances = sent_tokenize(content)
+        print("sentances")
+        print(sentances)
         disposition = None
-        for word in word_tokenize(sentances[-1]):
+        words = word_tokenize(sentances[-1])
+        print("WORDS in last sentance")
+        print(words)
+        for word in words:
             try:
-                disposition = int(word)
+                print(word)
+                disposition = int(float(word))
                 print(f"found disposition {disposition}")
             except ValueError:
+                print("got error")
                 pass
         return disposition
 

@@ -9,6 +9,7 @@ def get_help():
     hlp = "/help to see this printout\n"
     sav = "/save to save your current chat partner session to ./personality.dat\n"
     lod = "/load to bring back the saved chat partner session\n"
+    deb = "/debug to see details about the current personality you're talking to.\n"
     ext = "/exit to ghost."
     return "%s%s%s%s%s" % (mat, hlp, sav, lod, ext)
 
@@ -39,7 +40,7 @@ def main():
                 print("\t\tHi there! This is %s. It's great to see you again!" % matcher.personality.name)
             except NoPersonalityException:
                 print("Missing personality.dat file in basedir")
-        elif line.startswith("/match"): # TODO abstract this away
+        elif line.startswith("/match"):
             try:
                 name, years_old, gender = matcher.match(line)
                 matcher.new_personality(name, years_old, gender)
@@ -54,6 +55,13 @@ def main():
                     name, years_old, gender = matcher.match_random()
                     matcher.new_personality(name, years_old, gender)
                     print("\nNow talking with %s!\n" % matcher.personality)                
+        
+        elif line.startswith("/debug"):
+            if matcher.personality is None:
+                print("You're not matched with anyone yet so nothing to debug. Use /match")
+            else:
+                bot_line = matcher.debug_personality_response(matcher.personality, line)
+                print("\n%s" % (bot_line))
         else:
             conseq_failed_match_attempts = 0
             if matcher.personality is None:

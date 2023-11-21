@@ -56,5 +56,8 @@ class Matcher(object):
     def personality_response(self, line: str):
         return self.responder.respond(line)
     
+    def debug_personality_response(self, personality: Personality, line: str):
+        return PersonalityEchoResponder(personality).respond(line)
+    
     def set_responder(self):
         return GPTResponder(personality=self.personality)
