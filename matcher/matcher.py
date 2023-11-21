@@ -13,6 +13,9 @@ from responder.responder import PersonalityEchoResponder, GPTResponder
 class NoPersonalityException(Exception):
     pass
 
+class UnmatchedException(Exception):
+    pass
+
 class Matcher(object):
 
     def __init__(self):
@@ -34,7 +37,7 @@ class Matcher(object):
 
     def new_personality(self, name, years_old, gender):
         self.personality = Personality(name, years_old, gender, 
-                                       disposition=50.0, possible_traits=self.trait_loader.possible_traits, 
+                                       disposition=85.0, possible_traits=self.trait_loader.possible_traits,
                                        possible_interests=self.interest_loader.possible_interests)
         self.responder = self.set_responder()
         
@@ -54,7 +57,10 @@ class Matcher(object):
         self.responder = self.set_responder()
         
     def personality_response(self, line: str):
-        return self.responder.respond(line)
+        response = self.responder.respond(line)
+        if self.personality.disposition < 20.0:
+            raise UnmatchedException()
+        return response
     
     def debug_personality_response(self, personality: Personality, line: str):
         return PersonalityEchoResponder(personality).respond(line)

@@ -75,22 +75,58 @@ class GPTResponder(WrapperOutputResponder):
             prompt += " Include lots of emojis"
         return prompt
 
+    def build_done_prompt(self, user_input, num_sentances, include_emojis):
+        prompt = f"""
+            Let the person you're talking to know you're not interested in carrying on the conversation any longer.
+
+            Use {num_sentances} and your personality traits to formulate the response.
+        """
+        if include_emojis:
+            prompt += " Include lots of emojis"
+        return prompt
+
+    def build_wanna_meetup_prompt(self, user_input, num_sentances, include_emojis):
+        prompt = f"""
+            Let the person you're talking to know you'd be very much interested in meeting up with them for a date.
+
+            Use {num_sentances} and your personality traits to formulate the response.
+        """
+        if include_emojis:
+            prompt += " Include lots of emojis"
+        return prompt
+
     def build_response_from_input(self, user_input: str) -> str:
+        if self.personality.disposition >= 30.0:
+            prompt_func = self.build_prompt
+            if self.personality.disposition >= 80.0:
+                prompt_func = self.build_wanna_meetup_prompt
+            response = self._completion(prompt_func, user_input)
+            disposition, index = self.get_disposition(response)
+            if disposition is not None:
+                self.personality.update_disposition(disposition)
+                self.response_minus_disposition(response, index)
+            return response
+        else:
+            response = self._completion(self.build_done_prompt, user_input)
+            disposition = randint(0, 19)
+            so_youre_saying_theres_a_chance = randint(0, 100) < 10 # small chance of recovery
+            if so_youre_saying_theres_a_chance:
+                self.personality.update_disposition(35)
+            else:
+                self.personality.update_disposition(disposition)
+            return response
+
+    def _completion(self, prompt_func, user_input):
         num_sentances = randint(2, 6)
         use_emojies = randint(1, 10) < 4 # 30% of the time it works, every time.
         completion = self.client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": self.build_prompt(user_input, num_sentances, use_emojies)}
+                {"role": "user", "content": prompt_func(user_input, num_sentances, use_emojies)}
                 ]
             )
-        response = completion.choices[0].message.content
-        disposition, index = self.get_disposition(response)
-        if disposition is None:
-            return response
-        self.personality.update_disposition(disposition)
-        return self.response_minus_disposition(response, index)
+        return completion.choices[0].message.content
         
     def get_disposition(self, content):
         sentances = sent_tokenize(content)

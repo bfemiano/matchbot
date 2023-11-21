@@ -1,6 +1,6 @@
 import readline
 
-from matcher.matcher import Matcher, NoPersonalityException
+from matcher.matcher import Matcher, NoPersonalityException, UnmatchedException
 from gender.gender import UnsupportedGenderCommandException
 from age.age import UnsupportedAgeCommandException
 
@@ -67,8 +67,12 @@ def main():
             if matcher.personality is None:
                 print("You're not matched with anyone so nobody read that. Use /match")
             else:
-                bot_line = matcher.personality_response(line)
-                print("\n%s" % (bot_line))
+                try:
+                    bot_line = matcher.personality_response(line)
+                    print("\n%s" % (bot_line))
+                except UnmatchedException:
+                    print(f"You've been unmatched by {matcher.personality.name}. I guess you weren't very smooth")
+                    matcher.personality = None
 
 if __name__ == "__main__":
     main()

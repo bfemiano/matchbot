@@ -2,6 +2,30 @@ import pytest
 from personality.personality import Personality
 from responder.responder import GPTResponder
 
+
+class FakeGPTResponder(GPTResponder):
+
+    def __init__(self, *args, **kwargs):
+        super(FakeGPTResponder, self).__init__(wrap_count=100, *args, **kwargs)
+
+    def _completion(prompt_func, user_input):
+        pass
+        #TODO respond based on fake user_input.
+
+@pytest.fixture
+def low_disposition_responder():
+    possible_traits = {
+        'happy': set(['sad']),
+        'sad': set(['happy']),
+        'smart': set()
+    }
+    personality = Personality(name='test_name', years_old=25, gender='m', disposition=25.0,
+                       possible_traits=possible_traits, 
+                       possible_interests=['swimming', 'fishing', 'hiking'], 
+                       n_traits=2, n_interests=2)
+
+    return FakeGPTResponder(personality=personality)
+
 @pytest.fixture
 def responder():
     possible_traits = {
@@ -13,7 +37,22 @@ def responder():
                        possible_traits=possible_traits, 
                        possible_interests=['swimming', 'fishing', 'hiking'], 
                        n_traits=2, n_interests=2)
-    return GPTResponder(personality=personality)
+
+    return FakeGPTResponder(personality=personality)
+
+
+def high_disposition_responder():
+     possible_traits = {
+        'happy': set(['sad']),
+        'sad': set(['happy']),
+        'smart': set()
+    }
+    personality = Personality(name='test_name', years_old=25, gender='m', disposition=85.0,
+                       possible_traits=possible_traits, 
+                       possible_interests=['swimming', 'fishing', 'hiking'], 
+                       n_traits=2, n_interests=2)
+
+    return FakeGPTResponder(personality=personality)
 
 def test_get_int_easily_converted(responder):
     content = """
