@@ -100,9 +100,10 @@ class GPTResponder(WrapperOutputResponder):
             print(s)
             for word in words:
                 try:
-                    disposition = int(float(word))
-                    print(f"found disposition {disposition}")
-                    return disposition, (len(sentances)-1) - i
+                    if word.endswith(".0"):
+                        disposition = int(float(word))
+                        print(f"found disposition {disposition}")
+                        return disposition, (len(sentances)-1) - i
                 except ValueError:
                     pass
         return disposition, -1
