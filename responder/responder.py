@@ -1,5 +1,8 @@
+from random import randint
+
 from personality.personality import Personality
 
+from nltk.tokenize import sent_tokenize, word_tokenize
 from openai import OpenAI
 
 class WrapperOutputResponder(object):
@@ -44,9 +47,7 @@ class GPTResponder(WrapperOutputResponder):
         super(GPTResponder, self).__init__(wrap_count=100, *args, **kwargs)
         self.personality = personality
         self.client = OpenAI()
-
-    def build_prompt(self, user_input: str):
-        return f"""
+        self.system_prompt = f"""
             You are a {self.personality.years_old} years old person named {self.personality.name} 
             talking to someone using an online dating app who identifies as {self.personality.gender}. 
 
@@ -55,19 +56,54 @@ class GPTResponder(WrapperOutputResponder):
             Your interests include {', '.join(self.personality.interests)} and your personality traits include
             {', '.join(self.personality.personality_traits)}.
 
-            The person you're talking to using the online dating app has just sent you the following message '{user_input}'
-
-            Respond back in less than 3 sentances in a manner that is consistent with someone talking in an online dating app,
-            and also reflects your currenet disposition to them and your above personality traits and interests.
-            In the last sentance of your reply, indicate on a scale of 1.0 - 10.0, where 10.0 is the happiest and 1.0 is the saddest, how you felt
-            about the statement the person you're chatting with just made to you.
+            On a scale of 1 to 100 your current disposition of this person is {self.personality.disposition}.
         """
 
+    def build_prompt(self, user_input: str, num_sentances: int, include_emojis: bool):
+
+        prompt =  f"""
+            The person you're talking to using the online dating app has just sent you the following message '{user_input}'.
+
+            Respond back using between 1 and {num_sentances} sentances in a manner that reflects your age and
+            is consistent with someone talking in an online dating app,
+            and also reflects your current disposition to them and your above personality traits and interests.
+            The last sentance of your reply should be a single number between 0 and 100,
+            where 100 is the happiest and 0 is the saddest, how you felt about the 
+            statement the person you're chatting with just made to you.
+        """
+        if include_emojis:
+            prompt += " Include lots of emojis"
+        return prompt
+
     def build_response_from_input(self, user_input: str) -> str:
-        completion = client.chat.completions.create(
+        num_sentances = randint(2, 6)
+        use_emojies = randint(1, 10) < 4 # 30% of the time it works, every time.
+        completion = self.client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": self.build_prompt()}
+                {"role": "system", "content": self.system_prompt},
+                {"role": "user", "content": self.build_prompt(user_input, num_sentances, use_emojies)}
                 ]
             )
-        return completion['choices'][0]['message']['content']
+        response = completion.choices[0].message.content
+        disposition = self.get_disposition(response)
+        if disposition is None:
+            return response
+        
+        self.personality.update_disposition(disposition)
+        return self.strip_disposition(response)
+        
+    def get_disposition(self, content):
+        sentances = sent_tokenize(content)
+        disposition = None
+        for word in word_tokenize(sentances[-1]):
+            try:
+                disposition = int(word)
+                print(f"found disposition {disposition}")
+            except ValueError:
+                pass
+        return disposition
+
+    def strip_disposition(self, content):
+        sentances = sent_tokenize(content)
+        return ' '.join(sentances[0:-1])

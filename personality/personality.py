@@ -15,6 +15,7 @@ class Personality():
         self.years_old = years_old
         self.gender = gender
         self.disposition = disposition
+        self.num_responses = 0
         self.personality_traits = self.assign_random_traits(possible_traits, n_select=n_traits)
         self.interests = self.assign_random_interests(possible_interests, n_select=n_interests)
 
@@ -67,3 +68,7 @@ class Personality():
             cur_available_set.remove(r_interest)
             random_interests.append(r_interest)
         return random_interests
+
+    def update_disposition(self, disposition):
+        self.num_responses += 1
+        self.disposition = (self.disposition * (self.num_responses-1) + disposition) / self.num_responses

@@ -45,3 +45,11 @@ def test_assign_random_interests(possible_interests, personality):
     interests = sorted(personality.assign_random_interests(possible_interests, n_select=3))
     expected = ['fishing', 'hiking', 'swimming']
     assert interests == expected
+
+
+def test_update_disposition(personality):
+    disposition1 = 60.0
+    disposition2 = 70.0
+    personality.update_disposition(disposition1)
+    personality.update_disposition(disposition2)
+    assert personality.disposition == 60.0

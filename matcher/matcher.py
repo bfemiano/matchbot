@@ -8,21 +8,10 @@ from gender.gender import Gender
 from age.age import Age
 from personality.personality import Personality
 from personality.loaders import InterestLoader, TraitLoader
-from responder.responder import PersonalityEchoResponder
+from responder.responder import PersonalityEchoResponder, GPTResponder
 
 class NoPersonalityException(Exception):
     pass
-
-def slight_delay(name): # TODO abstract this away
-    delay = randint(1, 2)
-    print("\t\t<%s has received your message>" % name)
-    sleep(delay)
-    delay = randint(5, 10)
-    print("\t\t<%s is thinking of what to say>" % name)
-    sleep(delay)
-    delay = randint(3, 5)
-    print("\t\t<%s is responding>" % name)
-    sleep(delay)
 
 class Matcher(object):
 
@@ -65,8 +54,7 @@ class Matcher(object):
         self.responder = self.set_responder()
         
     def personality_response(self, line: str):
-        #slight_delay(self.personality)
         return self.responder.respond(line)
     
     def set_responder(self):
-        return PersonalityEchoResponder(personality=self.personality)
+        return GPTResponder(personality=self.personality)
