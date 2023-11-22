@@ -139,8 +139,7 @@ class GPTResponder(WrapperOutputResponder):
             words = word_tokenize(s)
             for word in words:
                 try:
-                    if word.endswith(".0") or word.endswith(".0."):
-                        word = word[0:-1]
+                    if word.endswith(".0"):
                         disposition = int(float(word))
                         return disposition, (len(sentances)-1) - i
                 except ValueError:
