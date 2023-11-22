@@ -1,9 +1,9 @@
 # matchbot
 A command line chatbot where you can have a conversation, get to know each other, and see you can setup a date (or get rejected)
 
-Requires Python 3+
+Requires Python 3.7+
 
-## Steps to start matchin':
+## Quickstart:
 
 1. Git clone this repo. CD to basedir location. 
 2. `pip install -r requirements.txt`
@@ -15,6 +15,10 @@ Requires Python 3+
 ## Tests
 
 `pytest tests`
+
+## Interface:
+
+TODO
 
 ## Design
 
