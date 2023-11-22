@@ -39,7 +39,7 @@ class Matcher(object):
 
     def new_personality(self, name, years_old, gender):
         self.personality = Personality(name, years_old, gender, 
-                                       disposition=85.0, possible_traits=self.trait_loader.possible_traits,
+                                       disposition=50.0, possible_traits=self.trait_loader.possible_traits,
                                        possible_interests=self.interest_loader.possible_interests)
         self.responder = self.set_responder()
         
