@@ -121,7 +121,7 @@ class GPTResponder(WrapperOutputResponder):
             return response
 
     def _completion(self, prompt_func, user_input):
-        num_sentances = randint(2, 6)
+        num_sentances = randint(1, 4)
         use_emojies = randint(1, 10) < 4 # 30% of the time it works, every time.
         completion = self.client.chat.completions.create(
             model="gpt-3.5-turbo",
@@ -137,11 +137,10 @@ class GPTResponder(WrapperOutputResponder):
         disposition = None
         for i, s in enumerate(reversed(sentances)):
             words = word_tokenize(s)
-            for word in words:
+            for word in reversed(words):
                 try:
-                    if word.endswith(".0"):
-                        disposition = int(float(word))
-                        return disposition, (len(sentances)-1) - i
+                    disposition = int(float(word))
+                    return disposition, (len(sentances)-1) - i
                 except ValueError:
                     pass
         return disposition, -1

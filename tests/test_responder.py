@@ -94,6 +94,22 @@ def test_not_disposition_found(responder):
     disposition, index = responder.get_disposition(content)
     assert disposition == None
 
+def test_disposition_parsed_from_end(responder):
+    content = """
+    Hey there! Not much. On a scale of 1 - 100 you are at a 50.0
+    """
+    disposition, index = responder.get_disposition(content)
+    assert disposition == 50.0
+    assert index == 2
+
+def test_disposition_handled_as_int_ok(responder):
+    content = """
+    Hey there! Not much. On a scale of 1 - 100 you are at a 50
+    """
+    disposition, index = responder.get_disposition(content)
+    assert disposition == 50.0
+    assert index == 2
+
 def test_disposition_found_at_end(responder):
     content = """
     Hey there! Not much. 50.0
