@@ -108,7 +108,7 @@ class GPTResponder(WrapperOutputResponder):
             disposition, index = self.get_disposition(response)
             if disposition is not None:
                 self.personality.update_disposition(disposition)
-                self.response_minus_disposition(response, index)
+                response = self.response_minus_disposition(response, index)
             return response
         else:
             response = self._completion(self.build_done_prompt, user_input)

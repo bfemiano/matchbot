@@ -11,11 +11,11 @@ class FakeGPTResponder(GPTResponder):
     def _completion(self, prompt_func, user_input):
         response = prompt_func(user_input, 1, False)
         if response.strip().find("just sent you the following message") > 0:
-            return "hey!"
+            return "hey! My disposition to you is 60.0"
         elif response.strip().find("not interested in carrying on the conversation any longer.") > 0:
             return "im done"
         elif response.strip().find("very much interested in meeting up") > 0:
-            return "lets hang out"
+            return "lets hang out. My disposition to you is 90.0"
         raise Exception()
 
 @pytest.fixture
@@ -138,5 +138,5 @@ def test_build_response_from_low_disposition(low_disposition_responder):
 def test_build_response_from_high_disposition(high_disposition_responder):
     input = "hey"
     response = high_disposition_responder.build_response_from_input(input)
-    assert response == "lets hang out"
+    assert response == "lets hang out."
 
