@@ -3,7 +3,6 @@ from random import randint
 from personality.personality import Personality
 
 from nltk.tokenize import sent_tokenize, word_tokenize
-from openai import OpenAI
 
 class WrapperOutputResponder(object):
     def __init__(self, wrap_count=80):
@@ -25,16 +24,16 @@ class WrapperOutputResponder(object):
             response.append(word)
         return " ".join(response)
 
-
-class GenericResponder(WrapperOutputResponder):
+    
+class EchoResponder(WrapperOutputResponder):
     
     def build_response_from_input(self, user_input: str) -> str:
-        return "This is a response from the Generic Responder."
+        return user_input
 
-class PersonalityEchoResponder(WrapperOutputResponder):
+class PersonalityDetailsResponder(WrapperOutputResponder):
 
     def __init__(self, personality, *args, **kwargs):
-        super(PersonalityEchoResponder, self).__init__(wrap_count=100, *args, **kwargs)
+        super(PersonalityDetailsResponder, self).__init__(wrap_count=100, *args, **kwargs)
         self.personality = personality
 
 
@@ -46,7 +45,6 @@ class GPTResponder(WrapperOutputResponder):
     def __init__(self, personality, *args, **kwargs):
         super(GPTResponder, self).__init__(wrap_count=100, *args, **kwargs)
         self.personality = personality
-        self.client = OpenAI()
         self.system_prompt = f"""
             You are a {self.personality.years_old} years old person named {self.personality.name} 
             talking to someone using an online dating app who identifies as {self.personality.gender}. 
@@ -58,6 +56,10 @@ class GPTResponder(WrapperOutputResponder):
 
             On a scale of 1 to 100 your current disposition of this person is {self.personality.disposition}.
         """
+
+    def connect(self):
+        from openai import OpenAI
+        self.client = OpenAI()
 
     def build_prompt(self, user_input: str, num_sentances: int, include_emojis: bool):
 
@@ -76,7 +78,9 @@ class GPTResponder(WrapperOutputResponder):
         return prompt
 
     def build_done_prompt(self, user_input, num_sentances, include_emojis):
-        prompt = f"""
+        prompt = f"""   
+            You're talking to a person using the online dating app.
+
             Let the person you're talking to know you're not interested in carrying on the conversation any longer.
 
             Use {num_sentances} and your personality traits to formulate the response.
@@ -133,12 +137,10 @@ class GPTResponder(WrapperOutputResponder):
         disposition = None
         for i, s in enumerate(reversed(sentances)):
             words = word_tokenize(s)
-            print(s)
             for word in words:
                 try:
                     if word.endswith(".0"):
                         disposition = int(float(word))
-                        print(f"found disposition {disposition}")
                         return disposition, (len(sentances)-1) - i
                 except ValueError:
                     pass

@@ -5,12 +5,18 @@ from responder.responder import GPTResponder
 
 class FakeGPTResponder(GPTResponder):
 
-    def __init__(self, *args, **kwargs):
-        super(FakeGPTResponder, self).__init__(wrap_count=100, *args, **kwargs)
+    def __init__(self, personality, *args, **kwargs):
+        super(FakeGPTResponder, self).__init__(personality, *args, **kwargs)
 
-    def _completion(prompt_func, user_input):
-        pass
-        #TODO respond based on fake user_input.
+    def _completion(self, prompt_func, user_input):
+        response = prompt_func(user_input, 1, False)
+        if response.strip().find("just sent you the following message") > 0:
+            return "hey!"
+        elif response.strip().find("not interested in carrying on the conversation any longer.") > 0:
+            return "im done"
+        elif response.strip().find("very much interested in meeting up") > 0:
+            return "lets hang out"
+        raise Exception()
 
 @pytest.fixture
 def low_disposition_responder():
@@ -19,7 +25,7 @@ def low_disposition_responder():
         'sad': set(['happy']),
         'smart': set()
     }
-    personality = Personality(name='test_name', years_old=25, gender='m', disposition=25.0,
+    personality = Personality(name='test_name', years_old=25, gender='m', disposition=21.0,
                        possible_traits=possible_traits, 
                        possible_interests=['swimming', 'fishing', 'hiking'], 
                        n_traits=2, n_interests=2)
@@ -40,9 +46,9 @@ def responder():
 
     return FakeGPTResponder(personality=personality)
 
-
+@pytest.fixture
 def high_disposition_responder():
-     possible_traits = {
+    possible_traits = {
         'happy': set(['sad']),
         'sad': set(['happy']),
         'smart': set()
@@ -110,3 +116,19 @@ def test_strip_last_sentance_question(responder):
 
     updated = responder.response_minus_disposition(content, 1)
     assert expected == updated
+
+def test_build_response_from_input(responder):
+    input = "hey"
+    response = responder.build_response_from_input(input)
+    assert response == "hey!"
+
+def test_build_response_from_low_disposition(low_disposition_responder):
+    input = "hey"
+    response = low_disposition_responder.build_response_from_input(input)
+    assert response == "im done"
+
+def test_build_response_from_high_disposition(high_disposition_responder):
+    input = "hey"
+    response = high_disposition_responder.build_response_from_input(input)
+    assert response == "lets hang out"
+

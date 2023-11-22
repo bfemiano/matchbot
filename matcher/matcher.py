@@ -8,7 +8,7 @@ from gender.gender import Gender
 from age.age import Age
 from personality.personality import Personality
 from personality.loaders import InterestLoader, TraitLoader
-from responder.responder import PersonalityEchoResponder, GPTResponder
+from responder.responder import PersonalityDetailsResponder, GPTResponder
 
 class NoPersonalityException(Exception):
     pass
@@ -24,6 +24,8 @@ class Matcher(object):
         self.trait_loader = TraitLoader()
         self.interest_loader = InterestLoader()
         self.personality = None
+        self.responder = None
+
 
     def match(self, command):
         name, gender = self.gender.get_name(command)
@@ -63,7 +65,9 @@ class Matcher(object):
         return response
     
     def debug_personality_response(self, personality: Personality, line: str):
-        return PersonalityEchoResponder(personality).respond(line)
+        return PersonalityDetailsResponder(personality).respond(line)
     
     def set_responder(self):
-        return GPTResponder(personality=self.personality)
+        responder = GPTResponder(personality=self.personality)
+        responder.connect()
+        return responder
