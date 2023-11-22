@@ -102,6 +102,14 @@ def test_disposition_found_at_end(responder):
     assert disposition == 50.0
     assert index == 2
 
+def test_disposition_found_at_end_trailing_period(responder):
+    content = """
+    Hey there! Not much. By the way my disposition to you is 50.0.
+    """
+    disposition, index = responder.get_disposition(content)
+    assert disposition == 50.0
+    assert index == 2
+
 
 def test_strip_last_sentance_statement(responder):
     content = "Hi. Disposition: 60.0"
