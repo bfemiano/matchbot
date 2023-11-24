@@ -3,7 +3,7 @@ from random import randint
 
 class UnsupportedGenderCommandException(Exception):
     def __init__(self):
-        self.msg = "Must be either m, f, or n (nonbinary)"
+        self.msg = "Gender must be either m (male), f (female), or n (nonbinary)"
         
 
 class Gender:
