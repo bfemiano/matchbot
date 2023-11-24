@@ -16,13 +16,13 @@ Requires Python 3.7+
 
 `/match [m|f|n] [18-100]`
 
+Use to start a conversation with a new personality. Matchbot will auto generate this based on the gender specified
+`m` (male) `f` (female) `n` (nonbinary). 
+
 examples:
 `/match f 25` --> female personality age 25.
 `/match m 25-45` --> male personality between the age 25 and 45.
-`/match n` --> random non-binary personality between the age 18 and 100.
-
-Use to start a conversation with a new personality. Matchbot will auto generate this based on the gender specified
-`m` (male) `f` (female) `n` (nonbinary). 
+`/match n` --> non-binary personality between the age 18 and 100.
 
 Age argument is optional. 
 
