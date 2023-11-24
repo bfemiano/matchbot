@@ -41,7 +41,7 @@ surprised. Format for range is dash-separated no spaces I.E. `25-45`.
 
 ## How it works
 
-When matchbot creates a personality for conversation, it autogenerates a few random interests and personality traits from the data sources below. Some language processing is done to make sure randomly assigned personality traits are not conflicting. E.G. A personality will not be both happy and sad, or funny and boring.
+When matchbot creates a personality for conversation, it autogenerates a few random interests and personality traits from the data sources below. Some language processing is done to make sure randomly assigned personality traits don't conflict. E.G. A personality will not be both happy and sad, or funny and boring.
 
 Where the conversation goes from here is up to the user. 
 
@@ -51,37 +51,37 @@ If their opinion of you gets low enough they'll suggest you talk with another pe
 
 If the opinion gets really low, the personality will automatically unmatch you.
 
-If you have a meaningful conversation and increase the personality's disposition of you high enough, they'll start suggesting you go on a date. Good job!
+If you have a meaningful conversation and the personality's opinion of you gets high enough, they'll start suggesting you go on a date. Nice work!
 
 You can see how the personality currently feels about you by running `/debug` and observing the disposition between 0.0 and 100. Where 0 is a very negative opinion, and 100 is perfect.
 
 ## Design
 
-Starting from the launch_cli.py top level, all printouts are done in the lauch_cli.py module. 
+launch_cli.py is the top level module with the user input loop. All printouts to the user are done here. 
 Any checked exceptions bubble up to this layer as well to printout a meaningful message to the user. This was done to prevent randomly scattered print() logs all over the codebase.
 
-Once the user asks for a match, various decoupled components interact with each other. Age and Gender both have their own dedicated modules to handle generation. Gender takes in the raw /match command from the user and responds with the `gender, name`. Where name is randomly generated based on the gender. Age does the same thing but responds with just `years_old`.
+Once the user asks for a match, a random personality is generated that matches the user's preference for gender and age. The gender component takes in the raw /match command from the user and responds with the `gender, name`. Where name is randomly generated based on the gender. The age component does the same thing but responds with just `years_old`.
 
-From here a personality construct is created using `gender`, `name`, `years_old` and some randomly selected interests and non-conflicting personality traits. Male and Female names are selected from the language processing library's names module. Nonbinary names, personality traits, and interests all come from the data sources cited below.
+From here a personality construct is created using `gender`, `name`, `years_old` and some randomly selected interests and non-conflicting personality traits. Male and female names are selected from the language processing library's names module. Nonbinary names, personality traits, and interests all come from the data sources cited below.
 
-Interaction between the user and personality involves three distinct design components. The matcher, the personality, and the responder.
+From here forward, interaction between the user and personality involves three distinct design components. The matcher, the personality, and the responder.
 
 ### Matcher
 
-Handles operations around loadin    g/saving/generation of personalities. The matcher is where the responder is instantiated and given a reference to the current personality. It's also where user inputs from the shell are forwarded to the responder for a response.
+Handles operations around generation and persistance of personalities. The matcher is where the responder is instantiated and given a reference to the current personality. It's also where user messages are forwarded to the responder to generate a response back to the user. Ghosting is not a behavior encoded into the personalities, although maybe I should?
 
 ### Personality
 
-All details of the person you're currently talking to. Currently includes: age, gender, current opinion of you, interests, and personality traits. (This will be expanded on over time)
+Contains the details of the match. Currently includes: age, gender, current opinion of you, interests, and personality traits. This will be expanded on over time (see roadmap section)
 
 ### Responder
 
-Takes a reference to the personality. When a user types something to the personality in conversation, the responder's job is to take that input and generate effective generativeAI prompts, based largely on the current details and traits within that personality. Currently there are only these responder types impemented:
+Takes a reference to the personality. When a user sends a message to the personality, the responder's job is to take that input and generate effective generativeAI prompts, based largely on the current details and traits within that personality. Currently there are only these responder types impemented:
 
 1. GPTResponder: OPenAI gpt 3.5 turbo model.
 2. Echo responder used only to printout the personality details for debugging.
 
-Part of the prompt dictates that a response should include as the last sentance a score between 0.0 and 100 of how the personality felt about the message they just received. The responder contains some custom language processing code to parse this out of the AI response, before forwarding the rest of the response to the user. If for some reason the responder can't find the disposition score in the response, just send the response as-is and don't leave their current opinion of you unchanged.
+Response will include as the last sentance a score between 0.0 and 100 of how the personality felt about the message they just received. This is to help the personality track their opinion of you as the conversation progresses. The responder contains some custom language processing code to parse this out of the response before forwarding the rest of the response to the user. If for some reason the responder can't find the disposition score in the response, just send the response as-is and leave their current opinion of you unchanged.
 
 ### Conversation flow design diagram
 
@@ -89,11 +89,11 @@ Part of the prompt dictates that a response should include as the last sentance 
 
 ## Next steps
 
-* Dedicated memory contained within personality.
+* Advanced memory contained within personality to help dynamically generate prompt sections.
 * Move disposition to memory.
 * Remember your name in memory. 
 * Get frustrated if the person keeps repeating themselves or asking the same questions over and over.
-* If bot asks them on a date and they say yes, don't keep asking. Start talking about how they can't wait to see you.
+* If bot asks them on a date and they say yes, don't keep suggesting a date. Start talking about how they can't wait to see you.
 
 ## Run tests
 
