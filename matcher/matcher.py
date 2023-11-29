@@ -33,13 +33,22 @@ class Matcher(object):
         return name, age, gender
 
     def match_random(self):
-        name, gender = self.gender.get_random_name()
-        age = self.age.get_random_age()
-        return name, age, gender
+        items = self.gender.get_random()
+        age = self.age.get_random()
+        return items[0], age, items[1]
 
-    def new_personality(self, name, years_old, gender):
+    def new_personality(self, line):
+        name, years_old, gender = self.match(line)
+        self._new_personality(name, years_old, gender)
+    
+    def new_random_personality(self):
+        (name, years_old, gender) = self.match_random()
+        self._new_personality(name, years_old, gender)
+
+    def _new_personality(self, name, years_old, gender):
+        default_dispostion = 50.0 if gender == 'm' else 35.0
         self.personality = Personality(name, years_old, gender, 
-                                       disposition=50.0, possible_traits=self.trait_loader.possible_traits,
+                                       disposition=default_dispostion, possible_traits=self.trait_loader.possible_traits,
                                        possible_interests=self.interest_loader.possible_interests)
         self.responder = self.set_responder()
         

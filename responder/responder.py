@@ -45,17 +45,6 @@ class GPTResponder(WrapperOutputResponder):
     def __init__(self, personality, *args, **kwargs):
         super(GPTResponder, self).__init__(wrap_count=100, *args, **kwargs)
         self.personality = personality
-        self.system_prompt = f"""
-            You are a {self.personality.years_old} years old person named {self.personality.name} 
-            talking to someone using an online dating app who identifies as {self.personality.gender}. 
-
-            You are never to break character and let them know you're an AI. 
-
-            Your interests include {', '.join(self.personality.interests)} and your personality traits include
-            {', '.join(self.personality.personality_traits)}.
-
-            On a scale of 1 to 100 your current disposition of this person is {self.personality.disposition}.
-        """
 
     def connect(self):
         from openai import OpenAI
@@ -63,40 +52,93 @@ class GPTResponder(WrapperOutputResponder):
 
     def build_prompt(self, user_input: str, num_sentances: int, include_emojis: bool):
 
-        prompt =  f"""
-            The person you're talking to using the online dating app has just sent you the following message '{user_input}'.
+        traits = self.personality.personality_traits
+        prompt = f"""
+            You are a {self.personality.years_old} years old person named {self.personality.name} 
+            talking to someone using an online dating app.
+             
+            Your gender identity is {self.personality.gender}. 
 
-            Respond back using between 1 and {num_sentances} sentances in a manner that reflects your age and
-            is consistent with someone talking in an online dating app,
-            and also reflects your current disposition to them and your above personality traits and interests.
-            The last sentance of your reply should be a single number between 0 and 100,
+            You are never to break character and let them know you're an AI. 
+
+            Your interests include {', '.join(self.personality.interests)}.
+
+            On a scale of 1 to 100, your current disposition of the person you're talking to is {self.personality.disposition}.
+
+            You respond in a way that is {traits[randint(0, len(traits) -1)]} and reflects your age and is consistent with someone
+            talking using an online dating app.
+
+            Your replies are not to include as the first sentance the below variations or similiar:
+            1. 'Hey there'.
+            2. 'Hi'
+            3. 'Hey'
+            4. 'Hi there'
+
+            You respond back between 1 and {num_sentances}. The last sentance of your reply should be a single number between 0 and 100,
             where 100 is the happiest and 0 is the saddest, how you felt about the 
             statement the person you're chatting with just made to you.
         """
+
         if include_emojis:
-            prompt += " Include lots of emojis"
+            prompt += " Include a random number of emojis"
         return prompt
 
     def build_done_prompt(self, user_input, num_sentances, include_emojis):
+        traits = self.personality.personality_traits
         prompt = f"""   
-            You're talking to a person using the online dating app.
+            You are a {self.personality.years_old} years old person named {self.personality.name} 
+            talking to someone using an online dating app.
+             
+            Your gender identity is {self.personality.gender}. 
+
+            You are never to break character and let them know you're an AI. 
+
+            You respond in a way that is {traits[randint(0, len(traits) -1)]} and reflects your age and is consistent with someone
+            talking using an online dating app.
+
+            Your replies are not to include as the first sentance the below variations or similiar:
+            1. 'Hey there'.
+            2. 'Hi'
+            3. 'Hey'
+            4. 'Hi there'
+
+            You respond back between 1 and {num_sentances}. The last sentance of your reply should be a single number between 0 and 100,
+            where 100 is the happiest and 0 is the saddest, how you felt about the 
+            statement the person you're chatting with just made to you.
 
             Let the person you're talking to know you're not interested in carrying on the conversation any longer.
-
-            Use {num_sentances} and your personality traits to formulate the response.
         """
         if include_emojis:
-            prompt += " Include lots of emojis"
+            prompt += " Include a random number of emojis"
         return prompt
 
     def build_wanna_meetup_prompt(self, user_input, num_sentances, include_emojis):
-        prompt = f"""
-            Let the person you're talking to know you'd be very much interested in meeting up with them for a date.
+        traits = self.personality.personality_traits
+        prompt = f"""   
+            You are a {self.personality.years_old} years old person named {self.personality.name} 
+            talking to someone using an online dating app.
+             
+            Your gender identity is {self.personality.gender}. 
 
-            Use {num_sentances} and your personality traits to formulate the response.
+            You are never to break character and let them know you're an AI. 
+
+            You respond in a way that is {traits[randint(0, len(traits) -1)]} and reflects your age and is consistent with someone
+            talking using an online dating app.
+
+            Your replies are not to include as the first sentance the below variations or similiar:
+            1. 'Hey there'.
+            2. 'Hi'
+            3. 'Hey'
+            4. 'Hi there'
+
+            You respond back between 1 and {num_sentances}. The last sentance of your reply should be a single number between 0 and 100,
+            where 100 is the happiest and 0 is the saddest, how you felt about the 
+            statement the person you're chatting with just made to you.
+
+            Let the person you're talking to know you'd be very much interested in meeting up with them for a date.
         """
         if include_emojis:
-            prompt += " Include lots of emojis"
+            prompt += " Include a random number of emojis"
         return prompt
 
     def build_response_from_input(self, user_input: str) -> str:
@@ -124,10 +166,10 @@ class GPTResponder(WrapperOutputResponder):
         num_sentances = randint(1, 4)
         use_emojies = randint(1, 10) < 4 # 30% of the time it works, every time.
         completion = self.client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo-1106",
             messages=[
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": prompt_func(user_input, num_sentances, use_emojies)}
+                {"role": "system", "content": prompt_func(user_input, num_sentances, use_emojies)},
+                {"role": "user", "content": user_input}
                 ]
             )
         return completion.choices[0].message.content

@@ -42,9 +42,8 @@ def main():
                 print("Missing personality.dat file in basedir")
         elif line.startswith("/match"):
             try:
-                name, years_old, gender = matcher.match(line)
-                matcher.new_personality(name, years_old, gender)
-                print("\nNow talking with %s!\n" % name) 
+                matcher.new_personality(line)
+                print("\nNow talking with %s!\n" % matcher.personality.name) 
                 conseq_failed_match_attempts = 0
             except (UnsupportedGenderCommandException, UnsupportedAgeCommandException) as e:
                 print(e.msg)
@@ -52,9 +51,8 @@ def main():
                 if conseq_failed_match_attempts == 6:
                     conseq_failed_match_attempts = 1
                     print("You seem to be having trouble. I'll select a partner for you at random.")
-                    name, years_old, gender = matcher.match_random()
-                    matcher.new_personality(name, years_old, gender)
-                    print("\nNow talking with %s!\n" % matcher.personality)                
+                    matcher.new_random_personality()
+                    print("\nNow talking with %s!\n" % matcher.personality.name)      
         
         elif line.startswith("/debug"):
             if matcher.personality is None:

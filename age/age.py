@@ -13,7 +13,7 @@ class Age():
         lower, upper = self._parse(parts[2])
         return self._random_age_from(lower, upper)
 
-    def get_random_age(self):
+    def get_random(self):
         return self._random_age_from(18, 100)
         
     def _parse(self, age_arg):

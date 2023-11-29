@@ -9,7 +9,7 @@ class UnsupportedGenderCommandException(Exception):
 class Gender:
 
     def __init__(self):
-        self.gender_types = ["f", "n", "b"]
+        self.gender_types = ['f', 'n', 'm']
         self.male_names = names.words('male.txt')
         self.female_names = names.words('female.txt')
         self.nonbinary_names = []
@@ -21,17 +21,18 @@ class Gender:
         parts = command.split(" ")
         if len(parts) < 2:
             raise UnsupportedGenderCommandException()
-        return self._get_name(parts[1])
+        return self._get_name(parts[1]), parts[1]
 
-    def get_random_name(self):
-        return self._get_name(self.gender_types[randint(0, len(self.gender_types) - 1)])
+    def get_random(self):
+        gender = self.gender_types[randint(0, len(self.gender_types) - 1)]
+        return self._get_name(gender), gender
 
-    def _get_name(self, gender:str) -> str:
-        if gender == "f":
-            return self.female_names[randint(0, len(self.female_names) - 1)], gender
-        elif gender == "m":
-            return self.male_names[randint(0, len(self.male_names) - 1)], gender
-        elif gender == "n":
-            return self.nonbinary_names[randint(0, len(self.nonbinary_names) - 1)], gender
+    def _get_name(self, gender: str) -> str:
+        if gender == 'f':
+            return self.female_names[randint(0, len(self.female_names) - 1)]
+        elif gender == 'm':
+            return self.male_names[randint(0, len(self.male_names) - 1)]
+        elif gender == 'n':
+            return self.nonbinary_names[randint(0, len(self.nonbinary_names) - 1)]
         else:
             raise UnsupportedGenderCommandException()
