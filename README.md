@@ -7,10 +7,9 @@ Requires Python 3.7+
 
 1. Git clone this repo. CD to basedir location. 
 2. `pip install -r requirements.txt`
-3. `python bootstrap.py` One time setup of nltk per local machine.
-4. Add matchbot basedir to PATH `export PATH=$PATH:/path/to/matchbot`
-5. Add OpenAI API key to env `export OPEN_API_KEY=${API_KEY>}`
-6. Run `matchbot`
+3. Add matchbot basedir to PATH `export PATH=$PATH:/path/to/matchbot`
+4. Add OpenAI API key to env `export OPEN_API_KEY=${API_KEY>}`
+5. Run `matchbot`
 
 ## Commands
 

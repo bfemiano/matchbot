@@ -4,6 +4,12 @@ from personality.personality import Personality
 
 from nltk.tokenize import sent_tokenize, word_tokenize
 
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_random_exponential,
+)  # for exponential backoff
+
 class WrapperOutputResponder(object):
     def __init__(self, wrap_count=80):
         self.wrap_count = wrap_count
@@ -62,6 +68,8 @@ class GPTResponder(WrapperOutputResponder):
             You are never to break character and let them know you're an AI. 
 
             Your interests include {', '.join(self.personality.interests)}.
+
+            Some of your life memories include {','.join(self.personality.memories)}
 
             On a scale of 1 to 100, your current disposition of the person you're talking to is {self.personality.disposition}.
 
@@ -162,6 +170,7 @@ class GPTResponder(WrapperOutputResponder):
                 self.personality.update_disposition(disposition)
             return response
 
+    @retry(wait=wait_random_exponential(max=60), stop=stop_after_attempt(6))
     def _completion(self, prompt_func, user_input):
         num_sentances = randint(1, 4)
         use_emojies = randint(1, 10) < 4 # 30% of the time it works, every time.
@@ -169,7 +178,7 @@ class GPTResponder(WrapperOutputResponder):
             model="gpt-3.5-turbo-1106",
             messages=[
                 {"role": "system", "content": prompt_func(user_input, num_sentances, use_emojies)},
-                {"role": "user", "content": user_input}
+                {"role": "user", "content": user_input},
                 ]
             )
         return completion.choices[0].message.content

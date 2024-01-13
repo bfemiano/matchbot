@@ -1,3 +1,4 @@
 nltk==3.7
 pytest==7.1.2
 openai
+tenacity

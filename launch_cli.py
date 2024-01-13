@@ -1,6 +1,6 @@
 import readline
 
-from matcher.matcher import Matcher, NoPersonalityException, UnmatchedException
+from matcher.matcher import Matcher, NoPersonalityException, UnmatchedException, UnableToFindMatchException
 from gender.gender import UnsupportedGenderCommandException
 from age.age import UnsupportedAgeCommandException
 
@@ -42,6 +42,7 @@ def main():
                 print("Missing personality.dat file in basedir")
         elif line.startswith("/match"):
             try:
+                print("\nLooking for a match....")
                 matcher.new_personality(line)
                 print("\nNow talking with %s!\n" % matcher.personality.name) 
                 conseq_failed_match_attempts = 0
@@ -52,7 +53,10 @@ def main():
                     conseq_failed_match_attempts = 1
                     print("You seem to be having trouble. I'll select a partner for you at random.")
                     matcher.new_random_personality()
-                    print("\nNow talking with %s!\n" % matcher.personality.name)      
+                    print("\nNow talking with %s!\n" % matcher.personality.name)
+            except (UnableToFindMatchException):
+                print("So sorry but we couldn't find a match. Try again.")
+
         
         elif line.startswith("/debug"):
             if matcher.personality is None:

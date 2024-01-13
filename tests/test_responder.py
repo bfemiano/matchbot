@@ -10,7 +10,7 @@ class FakeGPTResponder(GPTResponder):
 
     def _completion(self, prompt_func, user_input):
         response = prompt_func(user_input, 1, False)
-        if response.strip().find("just sent you the following message") > 0:
+        if response.strip().endswith("you're chatting with just made to you.") > 0:
             return "hey! My disposition to you is 60.0"
         elif response.strip().find("not interested in carrying on the conversation any longer.") > 0:
             return "im done"

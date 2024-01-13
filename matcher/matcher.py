@@ -1,13 +1,11 @@
 import pickle
 
 from os import path
-from random import randint
 from time import sleep
 
 from gender.gender import Gender
 from age.age import Age
-from personality.personality import Personality
-from personality.loaders import InterestLoader, TraitLoader
+from personality.personality import Personality, GPTBackstoryPersonality
 from responder.responder import PersonalityDetailsResponder, GPTResponder
 
 class NoPersonalityException(Exception):
@@ -16,40 +14,49 @@ class NoPersonalityException(Exception):
 class UnmatchedException(Exception):
     pass
 
+class UnableToFindMatchException(Exception):
+    pass
+
 class Matcher(object):
 
     def __init__(self):
         self.gender = Gender()
         self.age = Age()
-        self.trait_loader = TraitLoader()
-        self.interest_loader = InterestLoader()
         self.personality = None
         self.responder = None
 
-
     def match(self, command):
-        name, gender = self.gender.get_name(command)
+        gender = self.gender.get(command)
         age = self.age.get_age(command)
-        return name, age, gender
+        return age, gender
 
     def match_random(self):
-        items = self.gender.get_random()
+        gender = self.gender.get_random()
         age = self.age.get_random()
-        return items[0], age, items[1]
+        return age, gender
 
     def new_personality(self, line):
-        name, years_old, gender = self.match(line)
-        self._new_personality(name, years_old, gender)
+        years_old, gender = self.match(line)
+        self._new_personality(years_old, gender)
     
     def new_random_personality(self):
-        (name, years_old, gender) = self.match_random()
-        self._new_personality(name, years_old, gender)
+        (years_old, gender) = self.match_random()
+        self._new_personality(years_old, gender)
 
-    def _new_personality(self, name, years_old, gender):
+    def _new_personality(self, years_old, gender):
         default_dispostion = 50.0 if gender == 'm' else 35.0
-        self.personality = Personality(name, years_old, gender, 
-                                       disposition=default_dispostion, possible_traits=self.trait_loader.possible_traits,
-                                       possible_interests=self.interest_loader.possible_interests)
+        self.personality = GPTBackstoryPersonality(years_old, gender, disposition=default_dispostion)
+        max_attempts = 5
+        i = 0
+        done = False
+        while i < max_attempts and not done:
+            try:
+                self.personality.load()
+                done = True
+            except Exception as e:
+                i += 1
+        if not done:
+            raise UnableToFindMatchException()
         self.responder = self.set_responder()
         
     def save_personality(self):

@@ -1,55 +1,23 @@
-from personality.personality import Personality, UnableToAssignTraitsException
+from personality.personality import GPTBackstoryPersonality
 import pytest
 
 
 @pytest.fixture
-def possible_traits():
-    return  {
-        'happy': set(['sad']),
-        'sad': set(['happy']),
-        'smart': set()
-    }
+def personality():
+    personality = GPTBackstoryPersonality(years_old=25, gender='m', disposition=50.0)
+    return personality
 
 
-@pytest.fixture
-def possible_interests():
-    return ['swimming', 'fishing', 'hiking']
-
-
-@pytest.fixture
-def personality(possible_interests, possible_traits):
-    return Personality(name='test_name', years_old=25, gender='m', disposition=50.0,
-                       possible_traits=possible_traits, 
-                       possible_interests=possible_interests, 
-                       n_traits=2, n_interests=2)
-
-def test_assign_random_traits_avoids_conflicts(possible_traits, personality):
-    assigned_random_traits = personality.assign_random_traits(possible_traits, n_select=2)
-    if 'sad' in assigned_random_traits:
-        assert 'happy' not in assigned_random_traits
-    elif 'happy' in assigned_random_traits:
-        assert 'sad' not in assigned_random_traits
-    assert 'smart' in assigned_random_traits
-
-
-def test_assign_random_traits_gives_up_after_too_many_incompatible_attempts(possible_traits, possible_interests):
-    try:
-        Personality(name='test_name', years_old=25, gender='f', disposition=50.0,
-                    possible_traits=possible_traits, possible_interests=possible_interests, 
-                    n_traits=3, n_interests=2)
-        pytest.fail("select should have failed")
-    except UnableToAssignTraitsException:
-        pass
-
-def test_assign_random_interests(possible_interests, personality):
-    interests = sorted(personality.assign_random_interests(possible_interests, n_select=3))
-    expected = ['fishing', 'hiking', 'swimming']
-    assert interests == expected
-
-
-def test_update_disposition(personality):
-    disposition1 = 60.0
-    disposition2 = 70.0
-    personality.update_disposition(disposition1)
+def test_disposition_after_2_measurements(personality):
+    disposition2 = 60.0
     personality.update_disposition(disposition2)
-    assert personality.disposition == 60.0
+    actual = round(personality.disposition, 2)
+    assert actual == 56.67
+
+def test_disposition_after_3_measurements(personality):
+    disposition2 = 60.0
+    disposition3 = 70.0
+    personality.update_disposition(disposition2)
+    personality.update_disposition(disposition3)
+    actual = round(personality.disposition, 2)
+    assert actual ==  63.33
