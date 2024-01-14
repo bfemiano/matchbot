@@ -5,8 +5,8 @@ from time import sleep
 
 from gender.gender import Gender
 from age.age import Age
-from personality.personality import Personality, GPTBackstoryPersonality
-from responder.responder import PersonalityDetailsResponder, GPTResponder
+from personality.personality import save_as_engram, load_from_engram, GPTBackstoryPersonality
+from responder.responder import EchoResponder, PersonalityDetailsResponder, GPTResponder
 
 class NoPersonalityException(Exception):
     pass
@@ -64,15 +64,20 @@ class Matcher(object):
             raise NoPersonalityException()
 
         with open("saved_personality.dat", "wb") as out_file:
-            pickle.dump(self.personality, out_file)
+            pickle.dump(save_as_engram(self.personality), out_file)
 
     def load_personality(self):
         if not path.exists("saved_personality.dat"):
             raise NoPersonalityException()
 
         with open("saved_personality.dat", "rb") as in_file:
-            self.personality = pickle.load(in_file)
+            engram = pickle.load(in_file)
+            self.personality = load_from_engram(engram)
         self.responder = self.set_responder()
+
+    def welcome_back(self):
+        #print("\t\tHi there! This is %s. It's great to see you again!" % matcher.personality.name)
+        return EchoResponder().respond(self.personality.greeting_msg())
         
     def personality_response(self, line: str):
         response = self.responder.respond(line)
@@ -80,7 +85,7 @@ class Matcher(object):
             raise UnmatchedException()
         return response
     
-    def debug_personality_response(self, personality: Personality, line: str):
+    def debug_personality_response(self, personality: GPTBackstoryPersonality, line: str):
         return PersonalityDetailsResponder(personality).respond(line)
     
     def set_responder(self):

@@ -1,5 +1,5 @@
 import pytest
-from personality.personality import Personality
+from personality.personality import GPTBackstoryPersonality
 from responder.responder import GPTResponder
 
 
@@ -10,8 +10,11 @@ class FakeGPTResponder(GPTResponder):
 
     def _completion(self, prompt_func, user_input):
         response = prompt_func(user_input, 1, False)
-        if response.strip().endswith("you're chatting with just made to you.") > 0:
-            return "hey! My disposition to you is 60.0"
+        print(response)
+        if response.strip().find("Respond in a way that is noop") > 0:
+            return "hey!"
+        elif response.strip().find("Respond in a manner that indicates you are very horny") > 0:
+            return "horny!"
         elif response.strip().find("not interested in carrying on the conversation any longer.") > 0:
             return "im done"
         elif response.strip().find("very much interested in meeting up") > 0:
@@ -20,43 +23,45 @@ class FakeGPTResponder(GPTResponder):
 
 @pytest.fixture
 def low_disposition_responder():
-    possible_traits = {
-        'happy': set(['sad']),
-        'sad': set(['happy']),
-        'smart': set()
-    }
-    personality = Personality(name='test_name', years_old=25, gender='m', disposition=21.0,
-                       possible_traits=possible_traits, 
-                       possible_interests=['swimming', 'fishing', 'hiking'], 
-                       n_traits=2, n_interests=2)
+    personality = GPTBackstoryPersonality(years_old=25, gender='m', disposition=21.0)
+    personality.name = 'noop'
+    personality.personality_traits = ['noop']
+    personality.interests = ['noop']
+    personality.memories = ['noop']
+    personality.libido = 0
 
     return FakeGPTResponder(personality=personality)
 
 @pytest.fixture
 def responder():
-    possible_traits = {
-        'happy': set(['sad']),
-        'sad': set(['happy']),
-        'smart': set()
-    }
-    personality = Personality(name='test_name', years_old=25, gender='m', disposition=50.0,
-                       possible_traits=possible_traits, 
-                       possible_interests=['swimming', 'fishing', 'hiking'], 
-                       n_traits=2, n_interests=2)
+    personality = GPTBackstoryPersonality(years_old=25, gender='m', disposition=50.0)
+    personality.name = 'noop'
+    personality.personality_traits = ['noop']
+    personality.interests = ['noop']
+    personality.memories = ['noop']
+    personality.libido = 0
+
+    return FakeGPTResponder(personality=personality)
+
+@pytest.fixture
+def high_libido_responder():
+    personality = GPTBackstoryPersonality(years_old=25, gender='m', disposition=50.0)
+    personality.name = 'noop'
+    personality.personality_traits = ['noop']
+    personality.interests = ['noop']
+    personality.memories = ['noop']
+    personality.libido = 10
 
     return FakeGPTResponder(personality=personality)
 
 @pytest.fixture
 def high_disposition_responder():
-    possible_traits = {
-        'happy': set(['sad']),
-        'sad': set(['happy']),
-        'smart': set()
-    }
-    personality = Personality(name='test_name', years_old=25, gender='m', disposition=85.0,
-                       possible_traits=possible_traits, 
-                       possible_interests=['swimming', 'fishing', 'hiking'], 
-                       n_traits=2, n_interests=2)
+    personality = GPTBackstoryPersonality(years_old=25, gender='m', disposition=85.0)
+    personality.name = 'noop'
+    personality.personality_traits = ['noop']
+    personality.interests = ['noop']
+    personality.memories = ['noop']
+    personality.libido = 0
 
     return FakeGPTResponder(personality=personality)
 
@@ -145,6 +150,16 @@ def test_build_response_from_input(responder):
     input = "hey"
     response = responder.build_response_from_input(input)
     assert response == "hey!"
+
+def test_does_not_include_libido_response(responder):
+    input = "hey"
+    response = responder.build_response_from_input(input)
+    assert not response.find("suggestive") > 0
+
+def test_includes_libido_response(high_libido_responder):
+    input = "hey"
+    response = high_libido_responder.build_response_from_input(input)
+    assert response == "horny!"
 
 def test_build_response_from_low_disposition(low_disposition_responder):
     input = "hey"

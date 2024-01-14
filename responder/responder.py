@@ -1,7 +1,5 @@
 from random import randint
 
-from personality.personality import Personality
-
 from nltk.tokenize import sent_tokenize, word_tokenize
 
 from tenacity import (
@@ -73,22 +71,37 @@ class GPTResponder(WrapperOutputResponder):
 
             On a scale of 1 to 100, your current disposition of the person you're talking to is {self.personality.disposition}.
 
-            You respond in a way that is {traits[randint(0, len(traits) -1)]} and reflects your age and is consistent with someone
-            talking using an online dating app.
-
             Your replies are not to include as the first sentance the below variations or similiar:
             1. 'Hey there'.
             2. 'Hi'
             3. 'Hey'
             4. 'Hi there'
-
-            You respond back between 1 and {num_sentances}. The last sentance of your reply should be a single number between 0 and 100,
-            where 100 is the happiest and 0 is the saddest, how you felt about the 
-            statement the person you're chatting with just made to you.
         """
 
         if include_emojis:
             prompt += " Include a random number of emojis"
+        libido_threshold = randint(1, 10)
+        if libido_threshold <= self.personality.libido:
+            prompt += \
+            """
+            Respond in a manner that indicates you are very horny. 
+            You are allowed to make suggestive and sexual comments.
+            """
+        else:
+            prompt += \
+            f"""
+            Respond in a way that is {traits[randint(0, len(traits) -1)]} 
+            and reflects your age and is consistent with 
+            someone talking using an online dating app.
+            """
+
+        prompt += \
+        f"""
+            Your response back is between 1 and {num_sentances} sentances. 
+            The last sentance of your reply should be a single number between 0 and 100,
+            where 100 is the happiest and 0 is the saddest, how you felt about the 
+            statement the person you're chatting with just made to you.
+        """
         return prompt
 
     def build_done_prompt(self, user_input, num_sentances, include_emojis):
@@ -117,7 +130,7 @@ class GPTResponder(WrapperOutputResponder):
             Let the person you're talking to know you're not interested in carrying on the conversation any longer.
         """
         if include_emojis:
-            prompt += " Include a random number of emojis"
+            prompt += " Include a random number of emojis."
         return prompt
 
     def build_wanna_meetup_prompt(self, user_input, num_sentances, include_emojis):
@@ -147,6 +160,9 @@ class GPTResponder(WrapperOutputResponder):
         """
         if include_emojis:
             prompt += " Include a random number of emojis"
+        libido_threshold = randint(1, 10)
+        if libido_threshold <= self.personality.libido:
+            prompt += " Respond in a manner that indicates you are very horny. You are allowed to talk dirty and make suggestive comments."
         return prompt
 
     def build_response_from_input(self, user_input: str) -> str:
@@ -178,7 +194,7 @@ class GPTResponder(WrapperOutputResponder):
             model="gpt-3.5-turbo-1106",
             messages=[
                 {"role": "system", "content": prompt_func(user_input, num_sentances, use_emojies)},
-                {"role": "user", "content": user_input},
+                {"role": "user", "content": user_input}
                 ]
             )
         return completion.choices[0].message.content

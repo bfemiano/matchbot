@@ -37,7 +37,8 @@ def main():
         elif line == "/load":
             try:
                 matcher.load_personality()
-                print("\t\tHi there! This is %s. It's great to see you again!" % matcher.personality.name)
+                print("Reconnecting with " + matcher.personality.name)
+                print(matcher.welcome_back())
             except NoPersonalityException:
                 print("Missing personality.dat file in basedir")
         elif line.startswith("/match"):
