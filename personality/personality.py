@@ -23,7 +23,8 @@ class PersonalityEngram():
         previous personalities can still be reloaded. 
     """
     def __init__(self, years_old: int, gender: str, disposition: float, libido: int, 
-                 name: str, personality_traints: list, interests: list, memories: list):
+                 name: str, personality_traints: list, interests: list, memories: list,
+                 conversation_history: list):
         self.years_old = years_old
         self.gender = gender
         self.disposition = disposition
@@ -32,6 +33,7 @@ class PersonalityEngram():
         self.personality_traits = personality_traints
         self.interests = interests
         self.memories = memories
+        self.conversation_history = conversation_history
 
 class GPTBackstoryPersonality():
     """
@@ -45,6 +47,7 @@ class GPTBackstoryPersonality():
         self.n_disposition_updates = 1 # init to 1 based on default disposition.
         self.n_traits = randint(2, 5)
         self.n_interests = randint(2, 7)
+        self.conversation_history = []
 
     def update_disposition(self, disposition):
         self.n_disposition_updates += 1
@@ -93,12 +96,15 @@ class GPTBackstoryPersonality():
         return prompt
     
     @retry(wait=wait_random_exponential(max=60), stop=stop_after_attempt(6))
-    def complete(self, client, prompt):
+    def complete(self, client, prompt, use_json=True):
+        messages = [{"role": "system", "content": prompt}]
+        for user_comment, bot_response in self.conversation_history:
+            messages.append({ "role": "user", "content": user_comment })
+            messages.append({ "role": "assistant", "content": bot_response })
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
-            messages=[
-                {"role": "system", "content": prompt}
-                ]
+            response_format={ "type": "json_object" } if use_json else None,
+            messages=messages,
             )
         return completion.choices[0].message.content
     
@@ -114,16 +120,19 @@ class GPTBackstoryPersonality():
     def greeting_msg(self):
         from openai import OpenAI
         client = OpenAI()
-        return self.complete(client, self.get_welcome_back_prompt())
+        return self.complete(client, self.get_welcome_back_prompt(), use_json=False)
+    
+    def remember_comment(self, comment):
+        self.conversation_history.append(comment)
     
     def __str__(self):
         l1 = f"{self.name}. {self.years_old} years old. Identifes as {self.gender}. "
-        l2 = f"my libido on a scale of 1 - 10 is {self.libido}. "
+        l2 = f"My libido on a scale of 1 - 10 is {self.libido}. "
         l3 = f"I am {', '.join(self.personality_traits)}. "
         l4 = f"I like {', '.join(self.interests)} "
         l5 = f"disposition: {self.disposition} "
-        l6 = f"memories: {self.memories} "
-        return l1 + l2 + l3 + l4 + l5 + l6
+        l6 = "memories:"
+        return l1 + l2 + l3 + l4 + l5 + '\n'.join(self.memories)
     
 def load_from_engram(engram: PersonalityEngram):
     personality = GPTBackstoryPersonality(years_old=engram.years_old, gender=engram.gender, disposition=engram.disposition)
@@ -132,6 +141,7 @@ def load_from_engram(engram: PersonalityEngram):
     personality.personality_traits = engram.personality_traits
     personality.interests = engram.interests
     personality.memories = engram.memories
+    personality.conversation_history = engram.conversation_history
     return personality
 
 def save_as_engram(personality: GPTBackstoryPersonality):
@@ -143,4 +153,5 @@ def save_as_engram(personality: GPTBackstoryPersonality):
         libido=personality.libido,
         personality_traints=personality.personality_traits, 
         interests=personality.interests,
-        memories=personality.memories)
+        memories=personality.memories,
+        conversation_history=personality.conversation_history)

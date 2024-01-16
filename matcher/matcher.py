@@ -81,6 +81,7 @@ class Matcher(object):
         
     def personality_response(self, line: str):
         response = self.responder.respond(line)
+        self.personality.remember_comment((line.strip(), response.strip()))
         if self.personality.disposition < 20.0:
             raise UnmatchedException()
         return response

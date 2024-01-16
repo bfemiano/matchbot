@@ -65,6 +65,10 @@ class GPTResponder(WrapperOutputResponder):
 
             You are never to break character and let them know you're an AI. 
 
+            If a few messages have passed between the two of you, ask them their name.
+
+            If the last couple messages have been the same, tell the person they're starting to bore you.
+
             Your interests include {', '.join(self.personality.interests)}.
 
             Some of your life memories include {','.join(self.personality.memories)}
@@ -157,6 +161,8 @@ class GPTResponder(WrapperOutputResponder):
             statement the person you're chatting with just made to you.
 
             Let the person you're talking to know you'd be very much interested in meeting up with them for a date.
+            If they have recently responded that they would like to go out with you, don't keep asking them. Remind
+            them that they need to setup a date with you.
         """
         if include_emojis:
             prompt += " Include a random number of emojis"
@@ -190,12 +196,14 @@ class GPTResponder(WrapperOutputResponder):
     def _completion(self, prompt_func, user_input):
         num_sentances = randint(1, 4)
         use_emojies = randint(1, 10) < 4 # 30% of the time it works, every time.
+        messages = [{"role": "system", "content": prompt_func(user_input, num_sentances, use_emojies)}]
+        for user_comment, bot_response in self.personality.conversation_history:
+            messages.append({ "role": "user", "content": user_comment })
+            messages.append({ "role": "assistant", "content": bot_response })
+        messages.append({ "role": "user", "content": user_input })
         completion = self.client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
-            messages=[
-                {"role": "system", "content": prompt_func(user_input, num_sentances, use_emojies)},
-                {"role": "user", "content": user_input}
-                ]
+            messages=messages
             )
         return completion.choices[0].message.content
         
