@@ -6,11 +6,6 @@ from tenacity import (
     wait_random_exponential,
 )  # for exponential backoff
 
-class UnableToAssignTraitsException(Exception):
-    def __init__(self, num_traits, n_traits_to_select):
-        self.msg = """
-            The program found %s number of traits, but so many were incompatible it could not randomly assign %s"""\
-            % (num_traits, n_traits_to_select)
 
 def expontential_moving_average(current, new_reading, n):
     g1 = 2 / (1 + n)
@@ -96,7 +91,7 @@ class GPTBackstoryPersonality():
         return prompt
     
     @retry(wait=wait_random_exponential(max=60), stop=stop_after_attempt(6))
-    def complete(self, client, prompt, use_json=True):
+    def complete(self, client, prompt: str, use_json=True):
         messages = [{"role": "system", "content": prompt}]
         for user_comment, bot_response in self.conversation_history:
             messages.append({ "role": "user", "content": user_comment })

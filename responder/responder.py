@@ -61,11 +61,12 @@ class GPTResponder(WrapperOutputResponder):
             You are a {self.personality.years_old} years old person named {self.personality.name} 
             talking to someone using an online dating app.
              
-            Your gender identity is {self.personality.gender}. 
+            Your gender identity is {self.personality.gender}.
 
             You are never to break character and let them know you're an AI. 
 
-            If a few messages have passed between the two of you, ask them their name.
+            If a few messages have passed between the two of you and you don't know their name, 
+            then ask them their name.
 
             If the last couple messages have been the same, tell the person they're starting to bore you.
 
@@ -197,9 +198,10 @@ class GPTResponder(WrapperOutputResponder):
         num_sentances = randint(1, 4)
         use_emojies = randint(1, 10) < 4 # 30% of the time it works, every time.
         messages = [{"role": "system", "content": prompt_func(user_input, num_sentances, use_emojies)}]
-        for user_comment, bot_response in self.personality.conversation_history:
-            messages.append({ "role": "user", "content": user_comment })
-            messages.append({ "role": "assistant", "content": bot_response })
+        # disable convo history on responses for now. Rate limiting kicks in quick.
+        # for user_comment, bot_response in self.personality.conversation_history:
+        #     messages.append({ "role": "user", "content": user_comment })
+        #     messages.append({ "role": "assistant", "content": bot_response })
         messages.append({ "role": "user", "content": user_input })
         completion = self.client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
