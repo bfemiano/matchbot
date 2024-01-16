@@ -1,6 +1,6 @@
 import pytest
 from matcher.matcher import Matcher, UnmatchedException
-from personality.personality import GPTBackstoryPersonality
+from personality.personality import Personality
 from responder.responder import EchoResponder
 
 @pytest.fixture
@@ -19,12 +19,18 @@ def possible_interests():
 
 @pytest.fixture
 def personality(possible_interests, possible_traits):
-    return GPTBackstoryPersonality(years_old=25, gender='m', disposition=50.0)
+    return Personality(name='test_name', years_old=25, gender='m', disposition=50.0,
+                       possible_traits=possible_traits, 
+                       possible_interests=possible_interests, 
+                       n_traits=2, n_interests=2)
 
 
 @pytest.fixture
 def low_personality(possible_interests, possible_traits):
-    return GPTBackstoryPersonality(years_old=25, gender='m', disposition=10.0)
+    return Personality(name='test_name', years_old=25, gender='m', disposition=10.0,
+                       possible_traits=possible_traits, 
+                       possible_interests=possible_interests, 
+                       n_traits=2, n_interests=2)
 
 
 def test_personality_response(personality):
