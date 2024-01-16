@@ -6,6 +6,11 @@ from tenacity import (
     wait_random_exponential,
 )  # for exponential backoff
 
+def expontential_moving_average(current, new_reading, n):
+    g1 = 2 / (1 + n)
+    g2 = 1 - g1
+    return (g1 * new_reading) + (g2 * current) 
+
 class UnableToAssignTraitsException(Exception):
     def __init__(self, num_traits, n_traits_to_select):
         self.msg = """
@@ -13,30 +18,12 @@ class UnableToAssignTraitsException(Exception):
             % (num_traits, n_traits_to_select)
 
 
-def expontential_moving_average(current, new_reading, n):
-    g1 = 2 / (1 + n)
-    g2 = 1 - g1
-    return (g1 * new_reading) + (g2 * current) 
-
-class PersonalityEngram():
-    """
-        For saving/loading. That way if behavior is changed/added in GPTPersonality
-        previous personalities can still be reloaded. 
-    """
-    def __init__(self, name: str, years_old: int, gender: str, disposition: float, libido: int, 
-                 n_disposition_updates: int, personality_traits: list, 
-                 interests: list, conversation_history: list):
-        self.name = name
-        self.years_old = years_old
-        self.gender = gender
-        self.disposition = disposition
-        self.libido = libido
-        self.n_disposition_updates = n_disposition_updates
-        self.personality_traits = personality_traits
-        self.interests = interests
-        self.conversation_history = conversation_history
-
 class Personality():
+    """
+        Create a personality construct that has various attributes that influence user interaction.
+
+        The welcome back message uses the OpenAI completion API.  
+    """
 
     def __init__(self, name: str, years_old: int, gender: str, disposition: float, 
                  possible_traits: dict(), possible_interests: list(), n_traits=5, n_interests=5):
@@ -59,7 +46,7 @@ class Personality():
         return l1 + l2 + l3 + l4 + l5
         
 
-    def assign_random_traits(self, possible_traits, n_select):
+    def assign_random_traits(self, possible_traits: dict, n_select: int):
         '''
             Select 'n' number of random traits based on n_select. Return as a list
             Once a trait has been selected, avoid any traits listed as incompatible with it, 
@@ -89,7 +76,7 @@ class Personality():
                     raise UnableToAssignTraitsException(starting_num_trait_keys, n_select)
         return list(random_traits)
 
-    def assign_random_interests(self, possible_interests, n_select=5):
+    def assign_random_interests(self, possible_interests: list, n_select=5):
         '''s
             Select 'n' number of random interests from possible_interests.
         '''
@@ -103,12 +90,12 @@ class Personality():
                 random_interests.append(r_interest)
         return random_interests
     
-    def update_disposition(self, disposition):
+    def update_disposition(self, disposition: float):
         self.n_disposition_updates += 1
         self.disposition = expontential_moving_average(self.disposition, disposition, self.n_disposition_updates)
         return self.disposition
 
-    def remember_exchange(self, comment):
+    def remember_exchange(self, comment: tuple):
         self.conversation_history.append(comment)
 
     def greeting_msg(self):
@@ -146,6 +133,10 @@ class Personality():
 class GPTBackstoryPersonality(Personality):
     """
         Try out using OpenAI to randomly create a backstory, personality traits, and interests.
+
+        Completions return a JSON. 
+
+        This personality subclass also supports memories.
     """
     def __init__(self, *args, **kwargs):
         super(GPTBackstoryPersonality, self).__init__(*args, **kwargs)
@@ -196,31 +187,6 @@ class GPTBackstoryPersonality(Personality):
         printout = super(GPTBackstoryPersonality, self).__str__()
         return printout + 'memories:\n'.join(self.memories)
     
-def load_from_engram(engram: PersonalityEngram):
-    personality = Personality(name=engram.name,
-                              years_old=engram.years_old,
-                              gender=engram.gender,
-                              disposition=engram.disposition,
-                              possible_traits={}, possible_interests=[])
-    personality.libido = engram.libido
-    personality.n_disposition_updates = engram.n_disposition_updates
-    personality.personality_traits = engram.personality_traits
-    personality.interests = engram.interests
-    personality.conversation_history = engram.conversation_history
-    return personality
-
-def save_as_engram(personality: Personality):
-    return PersonalityEngram(
-        name=personality.name,
-        years_old=personality.years_old,
-        gender=personality.gender,
-        disposition=personality.disposition,
-        n_disposition_updates=personality.n_disposition_updates,
-        libido=personality.libido,
-        personality_traits=personality.personality_traits,
-        interests=personality.interests,
-        conversation_history=personality.conversation_history)
-
 if __name__ == "__main__":
     p = GPTBackstoryPersonality(name='foo', years_old=randint(18, 100), gender='f', 
                                 disposition=50.0, possible_traits={},

@@ -5,7 +5,8 @@ from time import sleep
 
 from gender.gender import Gender
 from age.age import Age
-from personality.personality import save_as_engram, load_from_engram, Personality
+from personality.personality import Personality
+from personality.engram_ops import save_as_engram, load_from_engram
 from personality.loaders import InterestLoader, TraitLoader
 from responder.responder import EchoResponder, PersonalityDetailsResponder, GPTResponder
 
@@ -19,6 +20,18 @@ class UnableToFindMatchException(Exception):
     pass
 
 class Matcher(object):
+    """
+        Allows for seperation of concerns between the personality and responder operations.
+        Also allows the user interaction with the shell to be abstracted away from the personality
+        directly. This mimics the dating app platform itself in a sense. 
+
+        Primary operations
+            1. Parsing match commands and constructing a personality instance.
+            2. Save/Load operations around personality engrams for persistence.
+            3. Forwarding user input to the personality and returning the response. Also unmatching 
+            if the personality's disposition to the user is low enough.
+            4. Debug commands.
+    """
 
     def __init__(self):
         self.gender = Gender()
@@ -28,7 +41,7 @@ class Matcher(object):
         self.personality = None
         self.responder = None
 
-    def match(self, command):
+    def match(self, command: str):
         name, gender = self.gender.get_name(command)
         age = self.age.get_age(command)
         return name, age, gender

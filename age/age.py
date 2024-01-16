@@ -5,8 +5,12 @@ class UnsupportedAgeCommandException(Exception):
         self.msg = msg
 
 class Age():
+    """
+        Parse age from the match command. Supports randomly generating an age within a range.
+        If the user enters an age outside the allowable range then an error occurs.
+    """
 
-    def get_age(self, command):
+    def get_age(self, command: str):
         parts = command.split(" ")
         if len(parts) < 3:
             return self._random_age_from(18, 100)

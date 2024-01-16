@@ -7,6 +7,10 @@ class UnsupportedGenderCommandException(Exception):
         
 
 class Gender:
+    """
+        Parse gender from match command or randomly generate. A random
+        name associated with the gender is also returned. 
+    """
 
     def __init__(self):
         self.gender_types = ['f', 'n', 'm']
@@ -17,7 +21,7 @@ class Gender:
             for line in nonbinary_names.readlines():
                 self.nonbinary_names.append(line.strip("\n"))
 
-    def get_name(self, command):
+    def get_name(self, command: str):
         parts = command.split(" ")
         if len(parts) < 2:
             raise UnsupportedGenderCommandException()

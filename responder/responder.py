@@ -9,6 +9,10 @@ from tenacity import (
 )  # for exponential backoff
 
 class WrapperOutputResponder(object):
+    """
+        Base class that can take any response and format it properly on the command line. 
+        subclasses much implement how to build a response.
+    """
     def __init__(self, wrap_count=80):
         self.wrap_count = wrap_count
 
@@ -30,12 +34,16 @@ class WrapperOutputResponder(object):
 
     
 class EchoResponder(WrapperOutputResponder):
-    
+    """
+        Simply returns the user input back.
+    """
     def build_response_from_input(self, user_input: str) -> str:
         return user_input
 
 class PersonalityDetailsResponder(WrapperOutputResponder):
-
+    """
+        Used for debug commands.
+    """
     def __init__(self, personality, *args, **kwargs):
         super(PersonalityDetailsResponder, self).__init__(wrap_count=100, *args, **kwargs)
         self.personality = personality
@@ -46,6 +54,9 @@ class PersonalityDetailsResponder(WrapperOutputResponder):
 
 
 class GPTResponder(WrapperOutputResponder):
+    """
+        Build a prompt programatically based on the personality attributes.
+    """
     def __init__(self, personality, *args, **kwargs):
         super(GPTResponder, self).__init__(wrap_count=100, *args, **kwargs)
         self.personality = personality
@@ -55,7 +66,11 @@ class GPTResponder(WrapperOutputResponder):
         self.client = OpenAI()
 
     def build_prompt(self, user_input: str, num_sentances: int, include_emojis: bool):
-
+        '''
+            Generate a prompt that creates interesting responses to the user input. 
+            Take into account age, gender, interests and how the personality currently
+            feels about the user (disposition). Personality libido also plays a random role.
+        '''
         traits = self.personality.personality_traits
         prompt = f"""
             You are a {self.personality.years_old} years old person named {self.personality.name} 
@@ -108,6 +123,9 @@ class GPTResponder(WrapperOutputResponder):
         return prompt
 
     def build_done_prompt(self, user_input, num_sentances, include_emojis):
+        '''
+            This prompt function get invoked when the personality is more or less sick of talking to the user.
+        '''
         traits = self.personality.personality_traits
         prompt = f"""   
             You are a {self.personality.years_old} years old person named {self.personality.name} 
@@ -137,6 +155,9 @@ class GPTResponder(WrapperOutputResponder):
         return prompt
 
     def build_wanna_meetup_prompt(self, user_input, num_sentances, include_emojis):
+        '''
+            This prompt function is invoked when the personality is very fond of the user.
+        '''
         traits = self.personality.personality_traits
         prompt = f"""   
             You are a {self.personality.years_old} years old person named {self.personality.name} 

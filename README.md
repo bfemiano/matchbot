@@ -3,6 +3,12 @@ A command line chatbot where you can have a conversation, get to know each other
 
 Requires Python 3.7+
 
+## Screenshots of usage
+
+![title](screenshots/shot1.png)
+
+![title](screenshots/shot2.png)
+
 ## Quickstart:
 
 1. Git clone this repo. CD to basedir location. 
@@ -72,7 +78,10 @@ Handles operations around generation and persistance of personalities. The match
 
 ### Personality
 
-Contains the details of the match. Currently includes: age, gender, current opinion of you, interests, and personality traits. This will be expanded on over time (see roadmap section)
+Contains the details of the match. Currently includes: age, gender, current opinion of you, interests, and personality traits. This will be expanded on over time (see roadmap section).
+
+Personalities can be saved to engram files as a .dat and reloaded later. When reloaded, the personality will
+use your conversation history as part of the completion prompt to generate a nice welcome back message. 
 
 ### Responder
 
@@ -83,17 +92,26 @@ Takes a reference to the personality. When a user sends a message to the persona
 
 Response will include as the last sentance a score between 0.0 and 100 of how the personality felt about the message they just received. This is to help the personality track their opinion of you as the conversation progresses. The responder contains some custom language processing code to parse this out of the response before forwarding the rest of the response to the user. If for some reason the responder can't find the disposition score in the response, just send the response as-is and leave their current opinion of you unchanged.
 
-### Conversation flow design diagram
+User input and responses are saved as conversation history. At this time the history is only used to generate a welcome
+back message when the personality is loaded back from an engram file. It is not sent cumulitively on every response to the user. For rate limiting reasons, the full convo history can't be sent per-response until my account is off the OpenAI free tier.
 
-![title](design_images/matchbot_conversion_flow.png)
+## Design diagrams
+
+### Create personality
+
+![title](design_images/create_personality_flow.png)
+
+### Conversation flow 
+
+![title](design_images/conversation_flow.png)
+
+### Save/Load engram
+
+![title](design_images/save_engram_flow.png)
 
 ## Next steps
 
-* Advanced memory contained within personality to help dynamically generate prompt sections.
-* Move disposition to memory.
-* Remember your name in memory. 
-* Get frustrated if the person keeps repeating themselves or asking the same questions over and over.
-* If bot asks them on a date and they say yes, don't keep suggesting a date. Start talking about how they can't wait to see you.
+* Uncomment conversational history to responder once my account is off free tier.
 
 ## Run tests
 
