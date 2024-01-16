@@ -139,6 +139,7 @@ class Personality():
             model="gpt-3.5-turbo-1106",
             response_format={ "type": "json_object" } if use_json else None,
             messages=messages,
+            seed=randint(1, 1000000000)
             )
         return completion.choices[0].message.content
 
@@ -148,6 +149,8 @@ class GPTBackstoryPersonality(Personality):
     """
     def __init__(self, *args, **kwargs):
         super(GPTBackstoryPersonality, self).__init__(*args, **kwargs)
+        self.n_traits = randint(3, 7)
+        self.n_interests = randint(3, 7)
         self.memories = []
 
     def get_generation_prompt(self):
@@ -217,3 +220,11 @@ def save_as_engram(personality: Personality):
         personality_traits=personality.personality_traits,
         interests=personality.interests,
         conversation_history=personality.conversation_history)
+
+if __name__ == "__main__":
+    p = GPTBackstoryPersonality(name='foo', years_old=randint(18, 100), gender='f', 
+                                disposition=50.0, possible_traits={},
+                                possible_interests=[])
+
+    p.load()
+    print(p)
