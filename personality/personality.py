@@ -206,7 +206,7 @@ def load_from_engram(engram: PersonalityEngram):
     personality.conversation_history = engram.conversation_history
     return personality
 
-def save_as_engram(personality: GPTBackstoryPersonality):
+def save_as_engram(personality: Personality):
     return PersonalityEngram(
         name=personality.name,
         years_old=personality.years_old,
