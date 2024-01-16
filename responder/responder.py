@@ -72,8 +72,6 @@ class GPTResponder(WrapperOutputResponder):
 
             Your interests include {', '.join(self.personality.interests)}.
 
-            Some of your life memories include {','.join(self.personality.memories)}
-
             On a scale of 1 to 100, your current disposition of the person you're talking to is {self.personality.disposition}.
 
             Your replies are not to include as the first sentance the below variations or similiar:

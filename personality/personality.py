@@ -6,6 +6,12 @@ from tenacity import (
     wait_random_exponential,
 )  # for exponential backoff
 
+class UnableToAssignTraitsException(Exception):
+    def __init__(self, num_traits, n_traits_to_select):
+        self.msg = """
+            The program found %s number of traits, but so many were incompatible it could not randomly assign %s"""\
+            % (num_traits, n_traits_to_select)
+
 
 def expontential_moving_average(current, new_reading, n):
     g1 = 2 / (1 + n)
@@ -18,8 +24,7 @@ class PersonalityEngram():
         previous personalities can still be reloaded. 
     """
     def __init__(self, years_old: int, gender: str, disposition: float, libido: int, 
-                 name: str, personality_traints: list, interests: list, memories: list,
-                 conversation_history: list):
+                 name: str, personality_traints: list, interests: list, conversation_history: list):
         self.years_old = years_old
         self.gender = gender
         self.disposition = disposition
@@ -27,8 +32,76 @@ class PersonalityEngram():
         self.name = name
         self.personality_traits = personality_traints
         self.interests = interests
-        self.memories = memories
         self.conversation_history = conversation_history
+
+class Personality():
+
+    def __init__(self, name: str, years_old: int, gender: str, disposition: float, 
+                 possible_traits: list(), possible_interests: list(), n_traits=5, n_interests=5):
+        self.name = name
+        self.years_old = years_old
+        self.gender = gender
+        self.disposition = disposition
+        self.libido = randint(1, 10)
+        self.n_disposition_updates = 1 # init to 1 based on default disposition.
+        self.personality_traits = self.assign_random_traits(possible_traits, n_select=n_traits)
+        self.interests = self.assign_random_interests(possible_interests, n_select=n_interests)
+        self.conversation_history = []
+
+    def __str__(self):
+        l1 = f"{self.name}. {self.years_old} years old. Identifes as {self.gender}. "
+        l2 = f"I am {', '.join(self.personality_traits)}. "
+        l3 = f"I like {', '.join(self.interests)} "
+        l4 = f"disposition: {self.disposition} "
+        return l1 + l2 + l3 + l4
+        
+
+    def assign_random_traits(self, possible_traits, n_select):
+        '''
+            Select 'n' number of random traits based on n_select. Return as a list
+            Once a trait has been selected, avoid any traits listed as incompatible with it, 
+            and do not count an incompatible trait towards the n_selected total random trait count. 
+
+            If we run out of available traits before reaching n_selected total random traits,
+            raise an error.
+        '''
+        random_traits = set()
+        trait_keys = set(possible_traits.keys())
+        starting_num_trait_keys = len(trait_keys)
+        i = 0
+        while i < n_select:
+            random_trait = list(trait_keys)[randint(0, len(trait_keys) - 1)]
+            has_trait_conflict = False
+            for incompatible_trait in possible_traits[random_trait]:
+                if incompatible_trait in random_traits:
+                    if incompatible_trait in trait_keys:
+                        trait_keys.remove(incompatible_trait) 
+                    has_trait_conflict = True
+            if not has_trait_conflict:
+                random_traits.add(random_trait)
+                i += 1
+            trait_keys.remove(random_trait)
+            if len(trait_keys) == 0 and i < n_select:
+                raise UnableToAssignTraitsException(starting_num_trait_keys, n_select)
+        return list(random_traits)
+
+    def assign_random_interests(self, possible_interests, n_select=5):
+        '''s
+            Select 'n' number of random interests from possible_interests.
+        '''
+        random_interests = []
+        cur_available_set= set(possible_interests)
+        for i in range(n_select):
+            cur_available = list(cur_available_set)
+            r_interest = cur_available[randint(0, len(cur_available) - 1)]
+            cur_available_set.remove(r_interest)
+            random_interests.append(r_interest)
+        return random_interests
+    
+    def update_disposition(self, disposition):
+        self.n_disposition_updates += 1
+        self.disposition = expontential_moving_average(self.disposition, disposition, self.n_disposition_updates)
+        return self.disposition
 
 class GPTBackstoryPersonality():
     """
@@ -130,7 +203,7 @@ class GPTBackstoryPersonality():
         return l1 + l2 + l3 + l4 + l5 + '\n'.join(self.memories)
     
 def load_from_engram(engram: PersonalityEngram):
-    personality = GPTBackstoryPersonality(years_old=engram.years_old, gender=engram.gender, disposition=engram.disposition)
+    personality = Personality(years_old=engram.years_old, gender=engram.gender, disposition=engram.disposition)
     personality.libido = engram.libido
     personality.name = engram.name
     personality.personality_traits = engram.personality_traits
