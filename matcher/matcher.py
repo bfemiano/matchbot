@@ -88,7 +88,10 @@ class Matcher(object):
         
     def personality_response(self, line: str):
         response = self.responder.respond(line)
-        self.personality.remember_exchange((line.strip(), response.strip()))
+        if len(response.strip()) > 0:
+            self.personality.remember_exchange((line.strip(), response.strip()))
+        else:
+            response = "%s had no response. Try again" % self.personality.name
         if self.personality.disposition < 20.0:
             raise UnmatchedException()
         return response

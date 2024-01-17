@@ -112,7 +112,8 @@ back message when the personality is loaded back from an engram file. It is not 
 
 ## Next steps
 
-* Uncomment conversational history to responder once my account is off free tier.
+* Try out other LLMs to see if this can work self hosted.
+* Figure out a better front end for usage.
 
 ## Run tests
 

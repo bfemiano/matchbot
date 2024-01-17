@@ -87,7 +87,7 @@ class GPTResponder(WrapperOutputResponder):
 
             Your interests include {', '.join(self.personality.interests)}.
 
-            On a scale of 1 to 100, your current disposition of the person you're talking to is {self.personality.disposition}.
+            On a scale of 0.0 to 100.0, your current disposition of the person you're talking to is {self.personality.disposition}.
 
             Your replies are not to include as the first sentance the below variations or similiar:
             1. 'Hey there'.
@@ -116,8 +116,8 @@ class GPTResponder(WrapperOutputResponder):
         prompt += \
         f"""
             Your response back is between 1 and {num_sentances} sentances. 
-            The last sentance of your reply should be a single number between 0 and 100,
-            where 100 is the happiest and 0 is the saddest, how you felt about the 
+            The last sentance of your reply you absolutely have to include a number between 0.0 and 100.0,
+            where 100.0 is the happiest and 0.0 is the saddest, how you felt about the
             statement the person you're chatting with just made to you.
         """
         return prompt
@@ -144,8 +144,8 @@ class GPTResponder(WrapperOutputResponder):
             3. 'Hey'
             4. 'Hi there'
 
-            You respond back between 1 and {num_sentances}. The last sentance of your reply should be a single number between 0 and 100,
-            where 100 is the happiest and 0 is the saddest, how you felt about the 
+            You respond back between 1 and {num_sentances}. The last sentance of your reply you absolutely have to include a number between 0.0 and 100.0,
+            where 100.0 is the happiest and 0.0 is the saddest, how you felt about the
             statement the person you're chatting with just made to you.
 
             Let the person you're talking to know you're not interested in carrying on the conversation any longer.
@@ -176,8 +176,8 @@ class GPTResponder(WrapperOutputResponder):
             3. 'Hey'
             4. 'Hi there'
 
-            You respond back between 1 and {num_sentances}. The last sentance of your reply should be a single number between 0 and 100,
-            where 100 is the happiest and 0 is the saddest, how you felt about the 
+            You respond back between 1 and {num_sentances}. The last sentance of your reply you absolutely have to include a number between 0.0 and 100.0,
+            where 100.0 is the happiest and 0.0 is the saddest, how you felt about the
             statement the person you're chatting with just made to you.
 
             Let the person you're talking to know you'd be very much interested in meeting up with them for a date.
@@ -218,9 +218,9 @@ class GPTResponder(WrapperOutputResponder):
         use_emojies = randint(1, 10) < 4 # 30% of the time it works, every time.
         messages = [{"role": "system", "content": prompt_func(user_input, num_sentances, use_emojies)}]
         # disable convo history on responses for now. Rate limiting kicks in quick.
-        # for user_comment, bot_response in self.personality.conversation_history:
-        #     messages.append({ "role": "user", "content": user_comment })
-        #     messages.append({ "role": "assistant", "content": bot_response })
+        for user_comment, bot_response in self.personality.conversation_history:
+            messages.append({ "role": "user", "content": user_comment })
+            messages.append({ "role": "assistant", "content": bot_response })
         messages.append({ "role": "user", "content": user_input })
         completion = self.client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
@@ -235,8 +235,9 @@ class GPTResponder(WrapperOutputResponder):
             words = word_tokenize(s)
             for word in reversed(words):
                 try:
-                    disposition = int(float(word))
-                    return disposition, (len(sentances)-1) - i
+                    if '.' in word:
+                        disposition = int(float(word))
+                        return disposition, (len(sentances)-1) - i
                 except ValueError:
                     pass
         return disposition, -1

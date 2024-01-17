@@ -105,12 +105,8 @@ class Personality():
 
     def get_welcome_back_prompt(self):
         prompt = f"""
-            Reply back in a manner that indicates how excited you are
-            to talk to this person after not hearing from them for awhile.
-
-            If you know their name from the conversation chat history, include it in the response.
-
-            Incorporate some of the conversational history into the response.
+            You are excited to see this person again and address them by name
+            assuming they told it to you.
         """
         if randint(1, 10) > 7:
             prompt += " Include a random number of emojis"
@@ -125,8 +121,7 @@ class Personality():
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
             response_format={ "type": "json_object" } if use_json else None,
-            messages=messages,
-            seed=randint(1, 1000000000)
+            messages=messages
             )
         return completion.choices[0].message.content
 
