@@ -91,7 +91,9 @@ Takes a reference to the personality. When a user sends a message to the persona
 2. Debug responder used only to printout the personality details on /debug command.
 3. Echo responder which just returns back whatever was sent.
 
-The response will include as the last sentance a score between 0.0 and 100.0 of how the personality felt about the message they just received. This is to help the personality track their opinion of you as the conversation progresses. The responder contains some custom language processing code to parse this out of the response before forwarding the rest of the response to the user. If for some reason the responder can't find the disposition score in the response, just send the response as-is and leave their current opinion of you unchanged.
+The response is sent through a sentiment analyzer to determine on a scale of 0.0 -> 100.0 how the personality felt about what you said. 
+
+This is to help the personality track their opinion of you as the conversation progresses.
 
 User input and responses are saved as conversation history. At this time the history is only used to generate a welcome
 back message when the personality is loaded back from an engram file. It is not sent cumulitively on every response to the user. For rate limiting reasons, the full convo history can't be sent per-response until my account is off the OpenAI free tier.
