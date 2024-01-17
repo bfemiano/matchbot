@@ -1,5 +1,7 @@
 import pickle
 
+
+from nltk.sentiment import SentimentIntensityAnalyzer
 from os import path
 from time import sleep
 
@@ -40,6 +42,7 @@ class Matcher(object):
         self.interest_loader = InterestLoader()
         self.personality = None
         self.responder = None
+        self.sentiment_analyzer = SentimentIntensityAnalyzer()
 
     def match(self, command: str):
         name, gender = self.gender.get_name(command)
@@ -88,8 +91,10 @@ class Matcher(object):
         
     def personality_response(self, line: str):
         response = self.responder.respond(line)
+        print(response)
         if len(response.strip()) > 0:
             self.personality.remember_exchange((line.strip(), response.strip()))
+            self.personality.update_disposition(self.get_disposition(response))
         else:
             response = "%s had no response. Try again" % self.personality.name
         if self.personality.disposition < 20.0:
@@ -103,3 +108,18 @@ class Matcher(object):
         responder = GPTResponder(personality=self.personality)
         responder.connect()
         return responder
+    
+    def get_disposition(self, content):
+        scores = self.sentiment_analyzer.polarity_scores(content)
+        #print("Scores: %s" % scores)
+        pos = scores['pos']
+        neg = scores['neg']
+        neu = scores['neu']
+        if neg > pos and neg > neu:
+            score = round(100.0 - (100.0 * neg), 2)
+        if neu > pos:
+            score = round(neu * 100.0, 2)
+        else:
+            score = round(pos * 100.0, 2)
+        #print(score)
+        return score

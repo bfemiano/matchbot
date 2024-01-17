@@ -1,7 +1,5 @@
 from random import randint
 
-from nltk.tokenize import sent_tokenize, word_tokenize
-
 from tenacity import (
     retry,
     stop_after_attempt,
@@ -115,10 +113,7 @@ class GPTResponder(WrapperOutputResponder):
 
         prompt += \
         f"""
-            Your response back is between 1 and {num_sentances} sentances. 
-            The last sentance of your reply you absolutely have to include a number between 0.0 and 100.0,
-            where 100.0 is the happiest and 0.0 is the saddest, how you felt about the
-            statement the person you're chatting with just made to you.
+            Your response back is between 1 and {num_sentances} sentances.
         """
         return prompt
 
@@ -144,9 +139,7 @@ class GPTResponder(WrapperOutputResponder):
             3. 'Hey'
             4. 'Hi there'
 
-            You respond back between 1 and {num_sentances}. The last sentance of your reply you absolutely have to include a number between 0.0 and 100.0,
-            where 100.0 is the happiest and 0.0 is the saddest, how you felt about the
-            statement the person you're chatting with just made to you.
+            You respond back between 1 and {num_sentances}.
 
             Let the person you're talking to know you're not interested in carrying on the conversation any longer.
         """
@@ -176,9 +169,7 @@ class GPTResponder(WrapperOutputResponder):
             3. 'Hey'
             4. 'Hi there'
 
-            You respond back between 1 and {num_sentances}. The last sentance of your reply you absolutely have to include a number between 0.0 and 100.0,
-            where 100.0 is the happiest and 0.0 is the saddest, how you felt about the
-            statement the person you're chatting with just made to you.
+            You respond back between 1 and {num_sentances}.
 
             Let the person you're talking to know you'd be very much interested in meeting up with them for a date.
             If they have recently responded that they would like to go out with you, don't keep asking them. Remind
@@ -196,21 +187,9 @@ class GPTResponder(WrapperOutputResponder):
             prompt_func = self.build_prompt
             if self.personality.disposition >= 80.0:
                 prompt_func = self.build_wanna_meetup_prompt
-            response = self._completion(prompt_func, user_input)
-            disposition, index = self.get_disposition(response)
-            if disposition is not None:
-                self.personality.update_disposition(disposition)
-                response = self.response_minus_disposition(response, index)
-            return response
         else:
-            response = self._completion(self.build_done_prompt, user_input)
-            disposition = randint(0, 19)
-            so_youre_saying_theres_a_chance = randint(0, 100) < 10 # small chance of recovery
-            if so_youre_saying_theres_a_chance:
-                self.personality.update_disposition(35)
-            else:
-                self.personality.update_disposition(disposition)
-            return response
+            prompt_func = self.build_done_prompt
+        return self._completion(prompt_func, user_input)
 
     @retry(wait=wait_random_exponential(max=60), stop=stop_after_attempt(6))
     def _completion(self, prompt_func, user_input):
@@ -227,21 +206,3 @@ class GPTResponder(WrapperOutputResponder):
             messages=messages
             )
         return completion.choices[0].message.content
-        
-    def get_disposition(self, content):
-        sentances = sent_tokenize(content)
-        disposition = None
-        for i, s in enumerate(reversed(sentances)):
-            words = word_tokenize(s)
-            for word in reversed(words):
-                try:
-                    if '.' in word:
-                        disposition = int(float(word))
-                        return disposition, (len(sentances)-1) - i
-                except ValueError:
-                    pass
-        return disposition, -1
-
-    def response_minus_disposition(self, content, index):
-        sentances = sent_tokenize(content)
-        return ' '.join([s for i, s in enumerate(sentances) if i != index])
