@@ -59,7 +59,7 @@ If the opinion gets really low, the personality will automatically unmatch you.
 
 If you have a meaningful conversation and the personality's opinion of you gets high enough, they'll start suggesting you go on a date. Nice work!
 
-You can see how the personality currently feels about you by running `/debug` and observing the disposition between 0.0 and 100. Where 0 is a very negative opinion, and 100 is perfect.
+You can see how the personality currently feels about you by running `/debug` and observing the disposition between 0.0 and 100.0. Where 0 is a very negative opinion, and 100 is perfect.
 
 ## Design
 
@@ -78,7 +78,7 @@ Handles operations around generation and persistance of personalities. The match
 
 ### Personality
 
-Contains the details of the match. Currently includes: age, gender, current opinion of you, interests, and personality traits. This will be expanded on over time (see roadmap section).
+Contains the details of the match. Currently includes: age, gender, libido, current opinion of you, interests, and personality traits, and conversational history.
 
 Personalities can be saved to engram files as a .dat and reloaded later. When reloaded, the personality will
 use your conversation history as part of the completion prompt to generate a nice welcome back message. 
@@ -88,9 +88,10 @@ use your conversation history as part of the completion prompt to generate a nic
 Takes a reference to the personality. When a user sends a message to the personality, the responder's job is to take that input and generate effective generativeAI prompts, based largely on the current details and traits within that personality. Currently there are only these responder types impemented:
 
 1. GPTResponder: OPenAI gpt 3.5 turbo model.
-2. Echo responder used only to printout the personality details for debugging.
+2. Debug responder used only to printout the personality details on /debug command.
+3. Echo responder which just returns back whatever was sent.
 
-Response will include as the last sentance a score between 0.0 and 100 of how the personality felt about the message they just received. This is to help the personality track their opinion of you as the conversation progresses. The responder contains some custom language processing code to parse this out of the response before forwarding the rest of the response to the user. If for some reason the responder can't find the disposition score in the response, just send the response as-is and leave their current opinion of you unchanged.
+The response will include as the last sentance a score between 0.0 and 100.0 of how the personality felt about the message they just received. This is to help the personality track their opinion of you as the conversation progresses. The responder contains some custom language processing code to parse this out of the response before forwarding the rest of the response to the user. If for some reason the responder can't find the disposition score in the response, just send the response as-is and leave their current opinion of you unchanged.
 
 User input and responses are saved as conversation history. At this time the history is only used to generate a welcome
 back message when the personality is loaded back from an engram file. It is not sent cumulitively on every response to the user. For rate limiting reasons, the full convo history can't be sent per-response until my account is off the OpenAI free tier.
