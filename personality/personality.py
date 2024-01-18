@@ -1,10 +1,5 @@
 import json
 from random import randint
-from tenacity import (
-    retry,
-    stop_after_attempt,
-    wait_random_exponential,
-)  # for exponential backoff
 
 def expontential_moving_average(current, new_reading, n):
     g1 = 2 / (1 + n)
@@ -21,8 +16,6 @@ class UnableToAssignTraitsException(Exception):
 class Personality():
     """
         Create a personality construct that has various attributes that influence user interaction.
-
-        The welcome back message uses the OpenAI completion API.  
     """
 
     def __init__(self, name: str, years_old: int, gender: str, disposition: float, 
@@ -97,33 +90,6 @@ class Personality():
 
     def remember_exchange(self, comment: tuple):
         self.conversation_history.append(comment)
-
-    def greeting_msg(self):
-        from openai import OpenAI
-        client = OpenAI()
-        return self.complete(client, self.get_welcome_back_prompt())
-
-    def get_welcome_back_prompt(self):
-        prompt = f"""
-            You are excited to see this person again and address them by name
-            assuming they told it to you.
-        """
-        if randint(1, 10) > 7:
-            prompt += " Include a random number of emojis"
-        return prompt
-
-    @retry(wait=wait_random_exponential(max=60), stop=stop_after_attempt(6))
-    def complete(self, client, prompt: str, use_json=False):
-        messages = [{"role": "system", "content": prompt}]
-        for user_comment, bot_response in self.conversation_history:
-            messages.append({ "role": "user", "content": user_comment })
-            messages.append({ "role": "assistant", "content": bot_response })
-        completion = client.chat.completions.create(
-            model="gpt-3.5-turbo-1106",
-            response_format={ "type": "json_object" } if use_json else None,
-            messages=messages
-            )
-        return completion.choices[0].message.content
 
 class GPTBackstoryPersonality(Personality):
     """

@@ -8,8 +8,8 @@ class FakeGPTResponder(GPTResponder):
     def __init__(self, personality, *args, **kwargs):
         super(FakeGPTResponder, self).__init__(personality, *args, **kwargs)
 
-    def _completion(self, prompt_func, user_input):
-        response = prompt_func(user_input, 1, False)
+    def complete(self, prompt_func, user_input, use_history=False, use_json=False):
+        response = prompt_func(1, False)
         if response.strip().find("Respond in a way that is") > 0:
             return "hey!"
         elif response.strip().find("Respond in a manner that indicates you are very horny") > 0:

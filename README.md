@@ -80,8 +80,7 @@ Handles operations around generation and persistance of personalities. The match
 
 Contains the details of the match. Currently includes: age, gender, libido, current opinion of you, interests, and personality traits, and conversational history.
 
-Personalities can be saved to engram files as a .dat and reloaded later. When reloaded, the personality will
-use your conversation history as part of the completion prompt to generate a nice welcome back message. 
+Personalities can be saved to engram files as a .dat and reloaded later. When reloaded, the personality will use your conversation history as part of the completion prompt to generate a nice welcome back message. 
 
 ### Responder
 

@@ -3,19 +3,15 @@ from matcher.matcher import Matcher, UnmatchedException
 from personality.personality import Personality
 from responder.responder import EchoResponder
 
+class FakeResponder(EchoResponder):
 
-class FakeAnalyzer():
-
-    def polarity_scores(self, content):
-        if content.strip() == "I hate you":
-            return {'neg': 0.85, 'neu': 0.13, 'pos': 0.02}
-        elif content.strip() == "I love you":
-            return {'neg': 0.02, 'neu': 0.13, 'pos': 0.85}
-        elif content.strip() == "I'm done":
-            return {'neg': 0.99, 'neu': 0.01, 'pos': 0.00}
+    def get_disposition(self, comment):
+        if comment.strip().find("well hey there") >= 0:
+            return 30.0
+        elif comment.strip().find("I'm done") >= 0:
+            return 1.0
         else:
-            return {'neg': 0.15, 'neu': 0.83, 'pos': 0.02}
-    
+            raise Exception()
 
 @pytest.fixture
 def possible_traits():
@@ -51,38 +47,20 @@ def analyzer():
     return FakeAnalyzer()
 
 
-def test_personality_response(personality, analyzer):
+def test_personality_response(personality):
     matcher = Matcher()
-    matcher.responder = EchoResponder()
-    matcher.sentiment_analyzer = analyzer
+    matcher.responder = FakeResponder()
     matcher.personality = personality
     response = matcher.personality_response("well hey there").replace("\t", '').strip()
     assert response == "well hey there"
 
-def test_unmatch(low_personality, analyzer):
+def test_unmatch(low_personality):
     matcher = Matcher()
-    matcher.responder = EchoResponder()
-    matcher.sentiment_analyzer = analyzer
+    matcher.responder = FakeResponder()
     matcher.personality = low_personality
     try:
         matcher.personality_response("I'm done")
         assert False
     except UnmatchedException:
         pass
-
-
-def test_get_neg_disposition(analyzer):
-    matcher = Matcher()
-    matcher.sentiment_analyzer = analyzer
-    assert matcher.get_disposition("I hate you") == 15.0
-
-def test_get_pos_disposition(analyzer):
-    matcher = Matcher()
-    matcher.sentiment_analyzer = analyzer
-    assert matcher.get_disposition("I love you") == 85.0
-
-def test_get_neu_disposition(analyzer):
-    matcher = Matcher()
-    matcher.sentiment_analyzer = analyzer
-    assert matcher.get_disposition("Neutral comment") == 83.0
 
