@@ -138,7 +138,6 @@ class GPTResponder(WrapperOutputResponder):
         """
         if include_emojis:
             prompt += " Include a random number of emojis."
-        print(prompt)
         return prompt
 
     def build_wanna_meetup_prompt(self, num_sentances, include_emojis):
