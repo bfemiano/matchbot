@@ -84,7 +84,7 @@ class Matcher(object):
 
     def welcome_back(self):
         #print("\t\tHi there! This is %s. It's great to see you again!" % matcher.personality.name)
-        return EchoResponder().respond(self.personality.greeting_msg())
+        return EchoResponder().respond(self.responder.greeting_msg())
         
     def personality_response(self, line: str):
         response = self.responder.respond(line)

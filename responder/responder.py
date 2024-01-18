@@ -1,3 +1,4 @@
+import json
 from random import randint
 
 from tenacity import (
@@ -208,6 +209,6 @@ class GPTResponder(WrapperOutputResponder):
         return self.complete(self.get_welcome_back_prompt, user_input="", use_history=True)
 
     def get_disposition(self, comment):
-        data= self.complete(self.get_score_prompt, user_input=comment, use_json=True)
+        data= json.loads(self.complete(self.get_score_prompt, user_input=comment, use_json=True))
         print(data)
         return data['score']
