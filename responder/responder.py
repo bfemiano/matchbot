@@ -184,7 +184,7 @@ class GPTResponder(WrapperOutputResponder):
                 prompt_func = self.build_wanna_meetup_prompt
         else:
             prompt_func = self.build_done_prompt
-        return self.complete(prompt_func, user_input)
+        return self.complete(prompt_func, user_input, use_history=True)
 
     #@retry(wait=wait_random_exponential(max=60), stop=stop_after_attempt(6))
     def complete(self, prompt_func, user_input, use_history=False, use_json=False):
@@ -209,5 +209,5 @@ class GPTResponder(WrapperOutputResponder):
 
     def get_disposition(self, comment):
         data= json.loads(self.complete(self.get_score_prompt, user_input=comment, use_json=True))
-        print(data)
+        #print(data)
         return data['score']

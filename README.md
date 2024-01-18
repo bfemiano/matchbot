@@ -86,7 +86,7 @@ Personalities can be saved to engram files as a .dat and reloaded later. When re
 
 Takes a reference to the personality. When a user sends a message to the personality, the responder's job is to take that input and generate effective generativeAI prompts, based largely on the current details and traits within that personality. Currently there are only these responder types impemented:
 
-1. GPTResponder: OPenAI gpt 3.5 turbo model.
+1. GPTResponder: OpenAI gpt 3.5 turbo model.
 2. Debug responder used only to printout the personality details on /debug command.
 3. Echo responder which just returns back whatever was sent.
 
