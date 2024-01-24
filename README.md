@@ -51,7 +51,7 @@ When matchbot creates a personality for conversation, it autogenerates a few ran
 
 Where the conversation goes from here is up to the user. 
 
-Depending on how you talk with the personality it will gradually increase/decrease their opinion of you. Being overly crude, mean, and/or discussing topics that don't align with their interest will have a decreased effect. 
+Depending on how you talk with the personality it will gradually increase/decrease their opinion of you. Being overly crude, mean, and/or discussing topics that don't align with their interests will have a decreased effect. 
 
 If their opinion of you gets low enough they'll suggest you talk with another person. There's a very low (but not zero) chance of recovering the conversation from here.
 
@@ -90,12 +90,11 @@ Takes a reference to the personality. When a user sends a message to the persona
 2. Debug responder used only to printout the personality details on /debug command.
 3. Echo responder which just returns back whatever was sent.
 
-The response is sent through a sentiment analyzer to determine on a scale of 0.0 -> 100.0 how the personality felt about what you said. 
+The response is sent with sent to OpenAI to determine on a scale of 0.0 -> 100.0 how the personality felt about what was just said. 
 
 This is to help the personality track their opinion of you as the conversation progresses.
 
-User input and responses are saved as conversation history. At this time the history is only used to generate a welcome
-back message when the personality is loaded back from an engram file. It is not sent cumulitively on every response to the user. For rate limiting reasons, the full convo history can't be sent per-response until my account is off the OpenAI free tier.
+User input and responses are saved as conversation history. The history is used to help the personality remember details of the conversation as things progress, even across different interactive sessions.
 
 ## Design diagrams
 
@@ -114,7 +113,7 @@ back message when the personality is loaded back from an engram file. It is not 
 ## Next steps
 
 * Try out other LLMs to see if this can work self hosted.
-* Figure out a better front end for usage.
+* Work on a more compelling interactive UI.
 
 ## Run tests
 
@@ -132,4 +131,4 @@ https://nameberry.com/list/851/nonbinary-names/all
 
 ### Interests
 
-https://en.wikipedia.org/wiki/List_of_hobbies
+https://simple.wikipedia.org/wiki/List_of_hobbies
