@@ -3,7 +3,7 @@ A command line chatbot where you can have a conversation, get to know each other
 
 Requires Python 3.7+
 
-## Screenshots of usage
+## Screenshots of usage (user input is left-justified starting with '>')
 
 ![title](screenshots/shot1.png)
 
@@ -30,12 +30,12 @@ examples:
 `/match m 25-45` --> male personality between the age 25 and 45.
 `/match n` --> non-binary personality between the age 18 and 100.
 
-Age argument is optional. 
+Age is an optional argument. If not supplied the program will generate a personality between 18 and 100 years of age (inclusive). 
 
 You can specify an exact age between `18` and `100` years old, or a range if you'd like to be
 surprised. Format for range is dash-separated no spaces I.E. `25-45`.
 
-`/save` to save the personality to `./saved_personality.dat`. This will let you reload later. This will overwrite any existing file with that name, so be sure to backup to a different location if you really don't want to lose the match!
+`/save` to save the personality to `./saved_personality.dat`. This will overwrite any existing file with that name, so be sure to backup to a different location if you really don't want to lose the match!
 
 `/load` to restore a personality for conversation using the file `./saved_personality.dat`
 

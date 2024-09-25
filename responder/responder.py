@@ -209,5 +209,5 @@ class GPTResponder(WrapperOutputResponder):
 
     def get_disposition(self, comment):
         data= json.loads(self.complete(self.get_score_prompt, user_input=comment, use_json=True))
-        #print(data)
+        print(data)
         return data['score']
