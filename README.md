@@ -3,6 +3,10 @@ A command line chatbot where you can have a conversation, get to know each other
 
 Requires Python 3.7+
 
+# Update
+
+OpenAI version is now stored in branch `openai_support`. The main branch and directions now run with ollama.
+
 ## Screenshots of usage (user input is left-justified starting with '>')
 
 ![title](screenshots/shot1.png)
@@ -112,7 +116,6 @@ User input and responses are saved as conversation history. The history is used 
 
 ## Next steps
 
-* Try out other LLMs to see if this can work self hosted.
 * Work on a more compelling interactive UI.
 
 ## Run tests
