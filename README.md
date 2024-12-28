@@ -3,8 +3,6 @@ A command line chatbot where you can have a conversation, get to know each other
 
 Requires Python 3.7+
 
-# Update
-
 OpenAI version is now stored in branch `openai_support`. The main branch and directions now run with ollama.
 
 ## Screenshots of usage (user input is left-justified starting with '>')
@@ -19,8 +17,9 @@ OpenAI version is now stored in branch `openai_support`. The main branch and dir
 2. `pip install -r requirements.txt`
 3. `python bootstrap.py` One time setup of nltk per local machine.
 4. Add matchbot basedir to PATH `export PATH=$PATH:/path/to/matchbot`
-5. Add OpenAI API key to env `export OPEN_API_KEY=${API_KEY>}`
-6. Run `matchbot`
+5. Get [Ollama](https://ollama.com/) and launch.
+6. Run `ollama pull llama3`
+7. Run `matchbot`
 
 ## Commands
 
@@ -90,11 +89,11 @@ Personalities can be saved to engram files as a .dat and reloaded later. When re
 
 Takes a reference to the personality. When a user sends a message to the personality, the responder's job is to take that input and generate effective generativeAI prompts, based largely on the current details and traits within that personality. Currently there are only these responder types impemented:
 
-1. GPTResponder: OpenAI gpt 3.5 turbo model.
+1. OllamaResponder: Ollama 3.2 8B
 2. Debug responder used only to printout the personality details on /debug command.
 3. Echo responder which just returns back whatever was sent.
 
-The response is sent with sent to OpenAI to determine on a scale of 0.0 -> 100.0 how the personality felt about what was just said. 
+The response is sent to the LLM to determine on a scale of 0.0 -> 100.0 how the personality felt about what was just said. 
 
 This is to help the personality track their opinion of you as the conversation progresses.
 

@@ -8,7 +8,7 @@ from age.age import Age
 from personality.personality import Personality
 from personality.engram_ops import save_as_engram, load_from_engram
 from personality.loaders import InterestLoader, TraitLoader
-from responder.responder import EchoResponder, PersonalityDetailsResponder, GPTResponder
+from responder.responder import EchoResponder, PersonalityDetailsResponder, OllamaResponder
 
 class NoPersonalityException(Exception):
     pass
@@ -91,17 +91,17 @@ class Matcher(object):
         if len(response.strip()) > 0:
             self.personality.remember_exchange((line.strip(), response.strip()))
             disposition = self.responder.get_disposition(line)
-            self.personality.update_disposition(disposition)
+            if disposition >= 0:
+                self.personality.update_disposition(disposition)
         else:
             response = "%s had no response. Try again" % self.personality.name
         if self.personality.disposition < 20.0:
             raise UnmatchedException()
-        return response
+        return response.strip("\n")
     
     def debug_personality_response(self, personality: Personality, line: str):
         return PersonalityDetailsResponder(personality).respond(line)
     
     def set_responder(self):
-        responder = GPTResponder(personality=self.personality)
-        responder.connect()
+        responder = OllamaResponder(personality=self.personality)
         return responder

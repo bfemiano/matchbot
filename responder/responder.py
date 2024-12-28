@@ -1,11 +1,7 @@
 import json
 from random import randint
-
-from tenacity import (
-    retry,
-    stop_after_attempt,
-    wait_random_exponential,
-)  # for exponential backoff
+import requests
+import re
 
 class WrapperOutputResponder(object):
     """
@@ -20,6 +16,7 @@ class WrapperOutputResponder(object):
 
     def respond(self, user_input: str) -> str:
         r = self.build_response_from_input(user_input)
+        r = r.replace("\n\n", "\0000").replace("\n", "\n\t\t").replace("\0000", "\n\n\t\t")
         response = [] 
         c = 0
         response.append("\t\t")
@@ -27,9 +24,11 @@ class WrapperOutputResponder(object):
             if c >= self.wrap_count:
                 c = 0
                 response.append("\n\t\t")
-            c += len(word) + 1 # space
+            if "\n" not in word:
+                c += len(word)
             response.append(word)
-        return " ".join(response)
+            response.append(" ")
+        return "".join(response)
 
     
 class EchoResponder(WrapperOutputResponder):
@@ -52,17 +51,14 @@ class PersonalityDetailsResponder(WrapperOutputResponder):
         return str(self.personality)
 
 
-class GPTResponder(WrapperOutputResponder):
+class OllamaResponder(WrapperOutputResponder):
     """
         Build prompts programatically based on the personality attributes.
     """
     def __init__(self, personality, *args, **kwargs):
-        super(GPTResponder, self).__init__(wrap_count=100, *args, **kwargs)
+        super(OllamaResponder, self).__init__(wrap_count=100, *args, **kwargs)
         self.personality = personality
-
-    def connect(self):
-        from openai import OpenAI
-        self.client = OpenAI()
+        self.url = "http://localhost:11434/api/chat"
 
     def base_prompt(self):
         return f"""
@@ -161,12 +157,13 @@ class GPTResponder(WrapperOutputResponder):
         return prompt
     
     def get_score_prompt(self, num_sentances, include_emojis):
-        return f"""
+        prompt = """
             Reply on a scale of 0.0 to 100.0 indicating how you feel about the most recent 
             user comment made towards you.
 
             Return just a single json object of the form {'score:'} with the score as a floating point value
         """
+        return prompt
     
     def get_welcome_back_prompt(self, num_sentances, include_emojis):
         prompt = f"""
@@ -184,10 +181,9 @@ class GPTResponder(WrapperOutputResponder):
                 prompt_func = self.build_wanna_meetup_prompt
         else:
             prompt_func = self.build_done_prompt
-        return self.complete(prompt_func, user_input, use_history=True)
+        return self.complete(prompt_func, user_input)
 
-    #@retry(wait=wait_random_exponential(max=60), stop=stop_after_attempt(6))
-    def complete(self, prompt_func, user_input, use_history=False, use_json=False):
+    def complete(self, prompt_func, user_input, use_history=True):
         num_sentances = randint(1, 4)
         include_emojis = randint(1, 10) < 4 # 30% of the time it works, every time.
         messages = [{"role": "system", "content": prompt_func(num_sentances, include_emojis)}]
@@ -197,16 +193,34 @@ class GPTResponder(WrapperOutputResponder):
                 messages.append({ "role": "assistant", "content": bot_response })
         if len(user_input) > 0:
             messages.append({ "role": "user", "content": user_input })
-        completion = self.client.chat.completions.create(
-            model="gpt-3.5-turbo-1106",
-            messages=messages,
-            response_format={ "type": "json_object" } if use_json else None,
-            )
-        return completion.choices[0].message.content
+        data = {
+            "model": "llama3",
+            "messages": messages,
+            "stream": False,
+        }
+
+        headers = {
+            "Content-Type": "application/json"
+        }
+        
+        response = requests.post(self.url, headers=headers, json=data)
+        return response.json()["message"]["content"]
+
     
     def greeting_msg(self):
         return self.complete(self.get_welcome_back_prompt, user_input="", use_history=True)
 
     def get_disposition(self, comment):
-        data= json.loads(self.complete(self.get_score_prompt, user_input=comment, use_json=True))
-        return data['score']
+        score_response = self.complete(self.get_score_prompt, user_input=comment, use_history=False)
+        score = -1
+        try:
+            data = json.loads(score_response)
+            score = data['score']
+        except json.decoder.JSONDecodeError:
+            score_parts = score_response.strip("{}").split(' ')
+            if len(score_parts) == 2:
+                try:
+                    score = float(score_parts[1])
+                except ValueError:
+                    pass
+        return score

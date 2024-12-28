@@ -1,12 +1,12 @@
 import pytest
 from personality.personality import Personality
-from responder.responder import GPTResponder
+from responder.responder import OllamaResponder
 
 
-class FakeGPTResponder(GPTResponder):
+class FakeOllamaResponder(OllamaResponder):
 
     def __init__(self, personality, *args, **kwargs):
-        super(FakeGPTResponder, self).__init__(personality, *args, **kwargs)
+        super(FakeOllamaResponder, self).__init__(personality, *args, **kwargs)
 
     def complete(self, prompt_func, user_input, use_history=False, use_json=False):
         response = prompt_func(1, False)
@@ -33,7 +33,7 @@ def low_disposition_responder():
                        n_traits=2, n_interests=2)
     personality.libido = 0
 
-    return FakeGPTResponder(personality=personality)
+    return FakeOllamaResponder(personality=personality)
 
 @pytest.fixture
 def responder():
@@ -48,7 +48,7 @@ def responder():
                        n_traits=2, n_interests=2)
     personality.libido = 0
 
-    return FakeGPTResponder(personality=personality)
+    return FakeOllamaResponder(personality=personality)
 
 @pytest.fixture
 def high_libido_responder():
@@ -64,7 +64,7 @@ def high_libido_responder():
 
     personality.libido = 10
 
-    return FakeGPTResponder(personality=personality)
+    return FakeOllamaResponder(personality=personality)
 
 @pytest.fixture
 def high_disposition_responder():
@@ -80,7 +80,7 @@ def high_disposition_responder():
 
     personality.libido = 0
 
-    return FakeGPTResponder(personality=personality)
+    return FakeOllamaResponder(personality=personality)
 
 def test_build_response_from_input(responder):
     input = "hey"
